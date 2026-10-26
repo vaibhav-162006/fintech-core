@@ -8,3 +8,9 @@ Day 1 - Ledger basics
 
 ## Day 2 - (title here)
 - your notes
+
+## Day 2 - Atomicity, idempotency, balanced transfers
+- BEGIN ... COMMIT groups steps; a failure rolls back everything, including the transfers row.
+- UNIQUE idempotency_key in the DB blocks duplicate (retried) payments, even from buggy code.
+- A deferred constraint trigger checks "debits = credits" at COMMIT, after all rows are in.
+- Migrations: numbered .sql files record how the schema evolved.
