@@ -55,7 +55,7 @@ export async function transfer(
         const balance = Number(result.rows[0].balance);
 
             if(balance < amountMinor){
-                throw new Error("Insuffecient funds");
+                throw new Error('INSUFFICIENT_FUNDS');
             }
 
             await client.query(

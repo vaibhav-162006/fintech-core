@@ -34,3 +34,10 @@
 - Idempotency key returns the original result on retry (replayed: true) and moves no money.
 - ROLLBACK in catch undoes every step since BEGIN, including the transfers row.
 - Gap: same key with different values is silently treated as a retry. Fix: store the request details and compare.
+
+## Day 6 - Concurrency stress test
+- Fired 50 simultaneous transfers at an account that could afford 10. With FOR UPDATE: exactly 10 succeeded, sender ended at 0.
+- Without FOR UPDATE: more than 10 succeeded and the sender went negative. The lock does real work.
+- The total across accounts still summed correctly even in the failing run, so "ledger balances" does not mean "no account overspent".
+- Promise.allSettled starts everything at once and keeps failures as results. A for loop with await would run them one by one and test nothing.
+- Bug: the test compared against a misspelled error string, so 40 correct rejections were counted as unexpected errors. Strings are checked by no one, so share them as constants.
