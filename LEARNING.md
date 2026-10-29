@@ -41,3 +41,12 @@
 - The total across accounts still summed correctly even in the failing run, so "ledger balances" does not mean "no account overspent".
 - Promise.allSettled starts everything at once and keeps failures as results. A for loop with await would run them one by one and test nothing.
 - Bug: the test compared against a misspelled error string, so 40 correct rejections were counted as unexpected errors. Strings are checked by no one, so share them as constants.
+
+## Day 7 - Reconciliation job
+- A script re-checks the whole ledger: every transfer balances, no customer account negative, total is zero, no completed transfer without entries.
+- It is a second line of defense for bugs, direct SQL edits, and bypassed code paths.
+- It found 9 real overdrafts left by my no-lock stress runs (-33000 = 21 successes instead of 10).
+- Fixed with one balanced correcting transfer from Treasury, never by editing or deleting history.
+- A balanced transfer can still overdraw an account (caught by check 2); an unbalanced one breaks the ledger total (caught by checks 1 and 3).
+- Triggers guard new writes only; reconciliation finds old problems.
+- Treasury is allowed to be negative because it issues the money.

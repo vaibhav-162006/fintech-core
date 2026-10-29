@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "stress": "tsx --env-file=.env src/stress-test.ts"
+    "stress": "tsx --env-file=.env src/stress-test.ts",
+    "reconcile": "tsx --env-file=.env src/reconcile.ts"
   },
   "keywords": [],
   "author": "",
