@@ -56,3 +56,11 @@
 - 201 = created, 200 = replayed retry, 400 = caller's mistake, 422 = understood but cannot be done (insufficient funds), 500 = our fault.
 - The idempotency key lives in a header, like Stripe, so "which request" is separate from "what it says".
 - Never send internal error text to callers; log it for ourselves.
+
+## Day 9 - Automated API tests
+- Tests call the running API over HTTP (black box) and assert the status code AND the effect on balances.
+- Each test makes fresh accounts with unique names, so tests never depend on each other or on old data.
+- Failing tests found real bugs: a typo in the response key (trnasferId), a missing 404 for unknown accounts, and no 422 mapping for INSUFFICIENT_FUNDS.
+- A retry test must reuse the SAME idempotency key; different keys mean different transfers.
+- The server must be restarted after editing code, because tsx does not reload by itself.
+- Changing code on purpose to see a test fail proves the test can catch the bug.

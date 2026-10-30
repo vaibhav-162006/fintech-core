@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --env-file=.env --import tsx --test src/api-test.ts",
     "stress": "tsx --env-file=.env src/stress-test.ts",
     "reconcile": "tsx --env-file=.env src/reconcile.ts",
     "start": "tsx --env-file=.env src/server.ts"

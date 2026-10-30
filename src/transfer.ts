@@ -17,7 +17,7 @@ export async function transfer(
         throw new Error('amount must be positive whole number is in paise')
     }
     if(fromAccountId === toAccountId){
-        throw new Error('cannot trnasfer to same account')
+        throw new Error('cannot transfer to same account')
     }
 
     const client = await pool.connect();
@@ -36,7 +36,7 @@ export async function transfer(
             'INSERT INTO transfers (idempotency_key) VALUES ($1) RETURNING id', 
             [idempotencyKey],
         );
-        const trnasferId = created.rows[0].id;
+        const transferId = created.rows[0].id;
 
         const lock = await client.query(
             'SELECT id FROM accounts WHERE id = $1 FOR UPDATE',
@@ -61,11 +61,11 @@ export async function transfer(
             await client.query(
 `INSERT INTO journal_entries (transfer_id, account_id, direction, amount_minor)
        VALUES ($1, $2, 'DEBIT', $4), ($1, $3, 'CREDIT', $4)`,
-    [trnasferId , fromAccountId , toAccountId , amountMinor]           
+    [transferId , fromAccountId , toAccountId , amountMinor]           
  );
 
  await client.query('COMMIT');
- return {trnasferId , replayed : false};
+ return {transferId , replayed : false};
     } catch(error){
         await client.query('ROLLBACK');
         throw error;

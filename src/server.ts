@@ -37,24 +37,30 @@ app.post('/transfers' , async(req,res) => {
         })
         return;
     }
+    const found = await pool.query(
+  'SELECT id FROM accounts WHERE id = ANY($1)',
+  [[fromAccountId, toAccountId]],
+);
+if (found.rows.length !== 2) {
+  res.status(404).json({ error: 'account not found' });
+  return;
+}
     try{
         const result = await transfer(key , fromAccountId , toAccountId , amount_minor);
         const status = result.replayed ? 200 : 201;
         res.status(status).json(result);
     }
-    catch(error){
-        const message = (error as Error).message;
-        if(message === 'Insuffecient funds'){
-            res.status(422).json({
-                error: "Insuffecient funds"
-            })
-            return;
-        }
-        console.error(error);
-        res.status(500).json({
-            error: "Internal error"
-        })
+    catch (error) {
+    const message = (error as Error).message;
+
+    if (message === 'INSUFFICIENT_FUNDS') {
+        res.status(422).json({ error: 'INSUFFICIENT_FUNDS' });
+        return;
     }
+
+    console.error(error);
+    res.status(500).json({ error: 'internal error' });
+}
 
 })
 app.get("/accounts/:id/balance" , async(req,res)=> {
