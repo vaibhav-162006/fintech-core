@@ -50,3 +50,9 @@
 - A balanced transfer can still overdraw an account (caught by check 2); an unbalanced one breaks the ledger total (caught by checks 1 and 3).
 - Triggers guard new writes only; reconciliation finds old problems.
 - Treasury is allowed to be negative because it issues the money.
+
+## Day 8 - HTTP API
+- Express wraps transfer(): read the Idempotency-Key header and the JSON body, validate, call transfer(), answer with a status code.
+- 201 = created, 200 = replayed retry, 400 = caller's mistake, 422 = understood but cannot be done (insufficient funds), 500 = our fault.
+- The idempotency key lives in a header, like Stripe, so "which request" is separate from "what it says".
+- Never send internal error text to callers; log it for ourselves.
