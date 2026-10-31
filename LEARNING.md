@@ -64,3 +64,12 @@
 - A retry test must reuse the SAME idempotency key; different keys mean different transfers.
 - The server must be restarted after editing code, because tsx does not reload by itself.
 - Changing code on purpose to see a test fail proves the test can catch the bug.
+
+## Day 10 - Self-starting tests and Docker Compose
+- Split app.ts (builds the Express app) from server.ts (calls listen), so tests can start their own copy on a free port (port 0 = pick any free one).
+- Compose runs the database and the API together with one command.
+- Postgres runs .sql files in docker-entrypoint-initdb.d on first start, only on an empty data directory. A failed init needs docker compose down -v before retrying.
+- depends_on with a healthcheck waits until the database is READY, not merely started.
+- down keeps data (named volume); down -v wipes it.
+- .dockerignore keeps .env and node_modules out of the image.
+- Bugs found: a missing ":" in a test URL, double quotes in SQL (column name, not text), and a space inside 'CREDIT ' that a CHECK constraint rejected.

@@ -1,8 +1,17 @@
-import test, {after} from "node:test";
+import test, {before , after} from "node:test";
 import assert from "node:assert/strict";
+import app from "./app"
 import { pool } from "./db";
+import { resolve } from "node:dns";
 
-const BASE_URL = process.env.BASE_URL ?? 'http://localhost:4000';
+let BASE_URL = '';
+let server : any;
+before(async ()=> {
+    await new Promise((resolve) => {
+        server = app.listen(0 , () => resolve(null));
+    });
+    BASE_URL = 'http://127.0.0.1:' + server.address().port;
+})
 const RUN = Date.now();
 
 async function balanceOf(accountId : number){
@@ -65,6 +74,8 @@ async function send(key : string | null , from : number , to : number , amount :
     };
 }
 after(async() => {
+    server.closeAllConnections();
+    await new Promise((resolve) => server.close(() => resolve(null)));
     await pool.end();
 });
 
