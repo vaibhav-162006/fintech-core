@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: dev
+          POSTGRES_DB: fintech
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d fintech"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://postgres:dev@127.0.0.1:5432/fintech
+
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create .env for the scripts
+        run: echo "DATABASE_URL=$DATABASE_URL" > .env
+
+      - name: Create schema and seed data
+        run: |
+          psql "$DATABASE_URL" -f db/init/001_schema.sql
+          psql "$DATABASE_URL" -f db/init/002_seed.sql
+
+      - name: API tests
+        run: npm test
+
+      - name: Concurrency stress test
+        run: npm run stress
+
+      - name: Reconciliation
+        run: npm run reconcile
