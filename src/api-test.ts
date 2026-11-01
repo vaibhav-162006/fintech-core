@@ -79,7 +79,7 @@ after(async() => {
     await pool.end();
 });
 
-test('a new transfer moves the money and return 201' , async () => {
+test('a new transfer moves the money and return 202' , async () => {
     const from = await createAccount('t1-from-'  + RUN, 10000);
     const to = await createAccount('t1-to-' + RUN , 0);
 
