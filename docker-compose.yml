@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_PASSWORD: dev
+      POSTGRES_PASSWORD: ved
       POSTGRES_DB: fintech
     ports:
       - "5433:5432"
