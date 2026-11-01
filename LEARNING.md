@@ -81,3 +81,12 @@
 - First failure: "password authentication failed". The database was started with one password and the URL used another. The log line named the cause directly.
 - Annotations show only the exit code; the step log has the real error. psql exit code 2 = could not connect.
 - git revert adds a correcting commit instead of rewriting history, like a correcting transfer in the ledger.
+
+## Day 13 - Risk engine, rules layer
+- A risk engine scores a transfer BEFORE it is posted: ALLOW, REVIEW (human check), or BLOCK.
+- Rules: velocity, unusual amount vs the sender's average, large payment to a new receiver, draining the balance, daily limit. Each adds points and a reason.
+- assessTransfer is a pure function (features in, decision out), so it is tested with simple cases and no database.
+- Boundaries are tested on purpose (4 vs 5 transfers, exactly 5x the average), because off-by-one mistakes live there.
+- Reasons make every decision explainable, which regulators and customers both need.
+- Thresholds are invented for learning; real ones come from data. The rules also give a baseline for the machine learning model later.
+- Known gap: many small transfers that each stay under every threshold.
