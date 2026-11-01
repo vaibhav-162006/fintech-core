@@ -13,7 +13,7 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_PASSWORD: ved
+          POSTGRES_PASSWORD: dev
           POSTGRES_DB: fintech
         ports:
           - 5432:5432
