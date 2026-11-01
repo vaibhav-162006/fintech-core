@@ -73,3 +73,11 @@
 - down keeps data (named volume); down -v wipes it.
 - .dockerignore keeps .env and node_modules out of the image.
 - Bugs found: a missing ":" in a test URL, double quotes in SQL (column name, not text), and a space inside 'CREDIT ' that a CHECK constraint rejected.
+
+## Day 11 - GitHub Actions CI
+- CI runs the same steps on a clean machine for every push: fresh Postgres service container, schema, seed, tests, stress test, reconciliation.
+- The workflow creates its own .env, because the real one is git-ignored and must never be committed.
+- A green badge in the README is proof a recruiter can see without running anything.
+- First failure: "password authentication failed". The database was started with one password and the URL used another. The log line named the cause directly.
+- Annotations show only the exit code; the step log has the real error. psql exit code 2 = could not connect.
+- git revert adds a correcting commit instead of rewriting history, like a correcting transfer in the ledger.
