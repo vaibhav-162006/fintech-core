@@ -9,7 +9,7 @@ export interface Features{
     transfersLastMinute: number;
     averageAmountMinor: number;
     pastTransferCount: number;
-    isNewReciever : boolean;
+    isNewReceiver : boolean;
     sentLast24hMinor : number;
     senderBalanceMinor: number; 
 }
@@ -29,7 +29,7 @@ export const CONFIG = {
     velocityLimitPerMinute: 5,
     unusualAmountMultiplier : 5,
     minHistoryForUsual:  3,
-    newRecieverLargeAmountMinor : 100000,
+    newReceiverLargeAmountMinor : 100000,
     drainPercent : 90,
     dailyLimitMinor : 1000000,
     reviewAt : 40,
@@ -39,7 +39,6 @@ export const CONFIG = {
 export function assessTransfer(request:  transferRequest , features: Features): RiskResult {
 const reasons : RiskReason[] = [];
 const amount = request.amountMinor;
-console.log('amount is', amount);
 
 
 if(features.transfersLastMinute >= CONFIG.velocityLimitPerMinute){
@@ -62,11 +61,11 @@ if(
 
     });
 }
-if(features.isNewReciever && amount >= CONFIG.newRecieverLargeAmountMinor){
+if(features.isNewReceiver && amount >= CONFIG.newReceiverLargeAmountMinor){
     reasons.push({
         code: 'NEW_RECEIVER_LARGE',
         points: 25,
-        message: 'large first-time payment to a new reciever'
+        message: 'large first-time payment to a new receiver'
     });
 }
 if(
@@ -87,6 +86,7 @@ if(features.sentLast24hMinor + amount > CONFIG.dailyLimitMinor){
         message: 'would exceed the daily sending limit'
     });
 }
+
 let score = 0;
 for(const reason of reasons){
     score = score + reason.points;

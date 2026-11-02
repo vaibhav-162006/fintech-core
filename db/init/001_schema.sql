@@ -41,3 +41,14 @@ CREATE CONSTRAINT TRIGGER trg_transfer_balanced
 AFTER INSERT ON journal_entries
 DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW EXECUTE FUNCTION check_transfered_balanced();
+CREATE TABLE IF NOT EXISTS risk_decision(
+    id BIGSERIAL PRIMARY KEY,
+    idempotency_key TEXT NOT NULL,
+    from_account_id INT NOT NULL,
+    to_account_id INT NOT NULL,
+    amount_minor INT NOT NULL,
+    decision TEXT NOT NULL CHECK (decision IN('ALLOW' , 'REVIEW' , 'BLOCK')),
+    score INT NOT NULL,
+    reasons JSONB NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);

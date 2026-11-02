@@ -90,3 +90,11 @@
 - Reasons make every decision explainable, which regulators and customers both need.
 - Thresholds are invented for learning; real ones come from data. The rules also give a baseline for the machine learning model later.
 - Known gap: many small transfers that each stay under every threshold.
+
+## Day 14 - Risk engine connected to the ledger
+- Flow: collect facts from the ledger, ask the guard, save the decision, then act: ALLOW runs transfer(), REVIEW holds (202), BLOCK declines (403).
+- Facts (features.ts) come from plain SQL over journal_entries: velocity, average size, new receiver, last 24 hours, balance.
+- risk_decisions stores every decision with its reasons, as an audit trail and for tuning rules.
+- Customers see only TRANSFER_DECLINED; reasons stay internal so fraudsters cannot learn which rule fired.
+- A retry of an already-completed key is not judged again. A transfer the sender cannot afford skips the guard and is rejected as insufficient funds (422).
+- Known gaps: the guard runs outside the transfer's transaction, so two simultaneous requests can both pass the velocity check. Held transfers have no approve/reject flow yet. Retrying a held request adds another decision row.

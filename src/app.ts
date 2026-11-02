@@ -1,6 +1,7 @@
 import express from "express";
 import { pool } from "./db"
 import{ transfer } from "./transfer";
+import { screenTransfer } from "./screen";
 import { error } from "node:console";
 
 const app = express();
@@ -12,6 +13,21 @@ app.post('/transfers' , async(req,res) => {
     const fromAccountId = body.fromAccountId;
     const toAccountId = body.toAccountId;
     const amount_minor = body.amount_minor;
+     const verdict = await screenTransfer(key , fromAccountId , toAccountId ,amount_minor);
+     if(verdict.action === 'DECLINE'){
+        res.status(403).json({
+            error : 'TRANSFER_DECLINED'
+        });
+        return;
+
+     }
+     if(verdict.action === 'HOLD'){
+        res.status(202).json({
+            status : 'PENDING_REVIEW',
+            decisionId: verdict.decisionId
+        });
+        return;
+     }
 
     if(!key){
         res.status(400).json({

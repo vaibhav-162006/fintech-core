@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert";
 import { assessTransfer } from "./risk"
-import { from } from "node:stream/iter";
 
 
 function quietFeatures() {
@@ -9,7 +8,7 @@ function quietFeatures() {
         transfersLastMinute: 0,
         averageAmountMinor : 0,
         pastTransferCount : 0,
-        isNewReciever : false,
+        isNewReceiver : false,
         sentLast24hMinor : 0,
         senderBalanceMinor: 100000
     };
@@ -62,8 +61,8 @@ test('too little history means the unusual-amount rules stay quiet' , () => {
 
     assert.deepEqual(codes(result) , []);
 });
-test('a large payment to a new reciever that drains the account is reviewed' , () => {
-    const features = {...quietFeatures() , isNewReciever : true , senderBalanceMinor : 100000};
+test('a large payment to a new receiver that drains the account is reviewed' , () => {
+    const features = {...quietFeatures() , isNewReceiver : true , senderBalanceMinor : 100000};
     const result = assessTransfer(request(100000),features);
 
 
@@ -91,4 +90,10 @@ test('two signals together add up to a block' , ()=> {
 
     assert.equal(result.score , 70);
     assert.equal(result.decision , 'BLOCK');
+});
+test('exactly 5x the average is not unusual (boundary)', () => {
+  const features = { ...quietFeatures(), pastTransferCount: 5, averageAmountMinor: 10000 };
+  const result = assessTransfer(request(50000), features);
+
+  assert.deepEqual(codes(result), []);
 });
