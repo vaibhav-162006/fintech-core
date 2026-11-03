@@ -139,3 +139,38 @@ test('a reciever that does not exist returns 404 and move mothing' , async() => 
     assert.equal(res.status , 404);
     assert.equal(await balanceOf(from) , 10000);
 });
+test('the 6th transfer in a minute in a held for review and moves no money ' , async() => {
+    const from = await createAccount('t7-from-' + RUN , 100000);
+    const to  = await createAccount('t7-to-' + RUN , 0);
+
+    for(let i = 1; i <= 5; i++){
+        const ok = await send('t7-' + i + '-' + RUN , from , to , 1000);
+        assert.equal(ok.status, 201);
+
+    }
+    const held = await send('t7-6-' + RUN , from , to , 1000);
+
+    assert.equal(held.status , 202);
+    assert.equal(held.body.status , 'PENDING_REVIEW');
+    assert.equal(await balanceOf(from) , 95000);
+
+    const saved = await pool.query(
+        `SELECT decision, reasons FROM risk_decision WHERE idempotency_key = $1`,
+        ['t7-6-' + RUN],
+    );
+    assert.equal(saved.rows[0].decision , 'REVIEW');
+    assert.equal(saved.rows[0].reasons[0].code , 'HIGH_VELOCITY');
+});
+
+test('going over the daily limit is declined with 403 and moves no money' , async() => {
+    const from = await createAccount('t8-from-' + RUN , 2000000);
+    const to = await createAccount('t8-to-' + RUN , 0);
+
+    const first = await send('t8-1-' + RUN , from , to , 950000);
+    assert.equal(first.status , 201);
+
+    const second = await send('t8-2-' + RUN , from , to , 60000);
+    assert.equal(second.status , 403);
+    assert.equal(second.body.error , 'TRANSFER_DECLINED');
+    assert.equal(await balanceOf(from) , 1050000);
+});

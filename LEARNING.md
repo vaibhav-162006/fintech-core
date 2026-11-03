@@ -98,3 +98,13 @@
 - Customers see only TRANSFER_DECLINED; reasons stay internal so fraudsters cannot learn which rule fired.
 - A retry of an already-completed key is not judged again. A transfer the sender cannot afford skips the guard and is rejected as insufficient funds (422).
 - Known gaps: the guard runs outside the transfer's transaction, so two simultaneous requests can both pass the velocity check. Held transfers have no approve/reject flow yet. Retrying a held request adds another decision row.
+
+## Day 14 - Risk engine connected to the ledger
+- Flow: collect facts from the ledger, ask the guard, save the decision, then act: ALLOW runs transfer(), REVIEW holds (202), BLOCK declines (403).
+- Facts (features.ts) come from plain SQL over journal_entries: velocity, average size, new receiver, last 24 hours, balance.
+- risk_decision stores every decision with its reasons, as an audit trail and for tuning rules.
+- Customers see only TRANSFER_DECLINED; reasons stay internal so fraudsters cannot learn which rule fired.
+- A retry of an already-completed key is not judged again. A transfer the sender cannot afford skips the guard and is rejected as insufficient funds (422).
+- Bugs: sendLast24hMinor vs sentLast24hMinor, a wrong key in a test (body.status vs body.error), a table renamed in the database but not in the code. A missing field is undefined, so a rule stays silent with no error. Only tests with known expected answers caught them.
+- When a test fails, the bug can be in the code or in the test. Check which one matches the design before changing either.
+- Known gaps: the guard runs outside the transfer's transaction, so two simultaneous requests can both pass the velocity check. Held transfers have no approve/reject flow yet. Retrying a held request adds another decision row.

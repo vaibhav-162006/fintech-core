@@ -46,7 +46,7 @@ export async function getFeatures(fromAccountId: number , toAccountId: number){
         pastTransferCount: Number(history.rows[0].n),
         averageAmountMinor:Number(history.rows[0].average),
         isNewReceiver : paidBefore.rows.length === 0,
-        sendLast24hMinor:Number(last24h.rows[0].total),
+        sentLast24hMinor:Number(last24h.rows[0].total),
         senderBalanceMinor: Number(balance.rows[0].balance),
     };
 }

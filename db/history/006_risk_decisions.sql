@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS risk_decision(
+CREATE TABLE IF NOT EXISTS risk_decisions(
     id BIGSERIAL PRIMARY KEY,
     idempotency_key TEXT NOT NULL,
     from_account_id INT NOT NULL,

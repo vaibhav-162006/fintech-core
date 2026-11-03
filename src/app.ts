@@ -13,22 +13,7 @@ app.post('/transfers' , async(req,res) => {
     const fromAccountId = body.fromAccountId;
     const toAccountId = body.toAccountId;
     const amount_minor = body.amount_minor;
-     const verdict = await screenTransfer(key , fromAccountId , toAccountId ,amount_minor);
-     if(verdict.action === 'DECLINE'){
-        res.status(403).json({
-            error : 'TRANSFER_DECLINED'
-        });
-        return;
-
-     }
-     if(verdict.action === 'HOLD'){
-        res.status(202).json({
-            status : 'PENDING_REVIEW',
-            decisionId: verdict.decisionId
-        });
-        return;
-     }
-
+     
     if(!key){
         res.status(400).json({
             error : 'idempotency-key header is required'
@@ -61,6 +46,22 @@ if (found.rows.length !== 2) {
   res.status(404).json({ error: 'account not found' });
   return;
 }
+const verdict = await screenTransfer(key , fromAccountId , toAccountId ,amount_minor);
+     if(verdict.action === 'DECLINE'){
+        res.status(403).json({
+            error : 'TRANSFER_DECLINED'
+        });
+        return;
+
+     }
+     if(verdict.action === 'HOLD'){
+        res.status(202).json({
+            status : 'PENDING_REVIEW',
+            decisionId: verdict.decisionId
+        });
+        return;
+     }
+
     try{
         const result = await transfer(key , fromAccountId , toAccountId , amount_minor);
         const status = result.replayed ? 200 : 201;
