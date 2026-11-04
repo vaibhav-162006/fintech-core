@@ -108,3 +108,11 @@
 - Bugs: sendLast24hMinor vs sentLast24hMinor, a wrong key in a test (body.status vs body.error), a table renamed in the database but not in the code. A missing field is undefined, so a rule stays silent with no error. Only tests with known expected answers caught them.
 - When a test fails, the bug can be in the code or in the test. Check which one matches the design before changing either.
 - Known gaps: the guard runs outside the transfer's transaction, so two simultaneous requests can both pass the velocity check. Held transfers have no approve/reject flow yet. Retrying a held request adds another decision row.
+
+## Day 15 - Held payments get a review (pieces 1 and 2)
+- Design: a held payment is a small state machine: PENDING_REVIEW -> APPROVED -> COMPLETED/FAILED, or -> REJECTED. A reviewer's approval must re-check the balance under the lock, because the world changed while it waited.
+- reviews stores the original request, because the reviewer approves it hours later and the system must be able to run it.
+- UNIQUE idempotency key on reviews makes a customer's retries harmless; INSERT ... ON CONFLICT DO NOTHING handles two retries at the same instant.
+- A retry of a held payment is not judged again, which also closed the gap of duplicate risk_decision rows.
+- Bug: a space inside 'PENDING_REVIEW ' in a CHECK made the table reject its own default. Always read \d output after creating a table.
+- Concepts to come: compare-and-set (UPDATE ... WHERE status = 'PENDING_REVIEW') so only one of two reviewers wins.

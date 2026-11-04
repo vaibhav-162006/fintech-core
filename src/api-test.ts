@@ -148,7 +148,7 @@ test('the 6th transfer in a minute in a held for review and moves no money ' , a
         assert.equal(ok.status, 201);
 
     }
-    const held = await send('t7-6-' + RUN , from , to , 1000);
+    const held = await send('t7-6-' + RUN , from , to , 1000 );
 
     assert.equal(held.status , 202);
     assert.equal(held.body.status , 'PENDING_REVIEW');
@@ -173,4 +173,32 @@ test('going over the daily limit is declined with 403 and moves no money' , asyn
     assert.equal(second.status , 403);
     assert.equal(second.body.error , 'TRANSFER_DECLINED');
     assert.equal(await balanceOf(from) , 1050000);
+});
+test('retrying a held payment returns to same review and crates no second one' , async () => {
+    const from = await createAccount('t9-from-' + RUN , 100000);
+    const to = await createAccount('t9-to-' + RUN , 0);
+    
+    for(let i = 1 ; i <= 5; i++){
+        await send('t9-' + i + '-' + RUN , from , to , 1000);
+
+    }
+    const first = await send('t9-6-' + RUN , from ,to , 1000);
+    const retry = await send('t9-6-' + RUN , from , to , 1000);
+
+    assert.equal(first.status ,202);
+    assert.equal(retry.status, 202);
+    assert.equal(retry.body.reviewId , first.body.reviewId);
+
+    const reviews = await pool.query(
+        `SELECT COUNT(*) AS n FROM reviews WHERE idempotency_key = $1`,
+        ['t9-6-' + RUN],
+    );
+    assert.equal(Number(reviews.rows[0].n) , 1);
+
+    const decisions = await pool.query(
+        `SELECT COUNT(*) AS n FROM risk_decision WHERE idempotency_key = $1`,
+        ['t9-6-' + RUN],
+    );
+    assert.equal(Number(decisions.rows[0].n) , 1);
+
 });

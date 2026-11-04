@@ -1,6 +1,8 @@
 import { pool } from "./db"
 import { assessTransfer } from "./risk"
 import { getFeatures } from "./features"
+import { stat } from "node:fs";
+import { from } from "node:stream/iter";
 
 export async function screenTransfer(
     key : string,
@@ -8,6 +10,19 @@ export async function screenTransfer(
     toAccountId: number,
     amountMinor: number,
 ){
+        const heldBefore = await pool.query(
+        `SELECT id, status FROM reviews WHERE idempotency_key = $1`,
+        [key],
+
+    );
+    if(heldBefore.rows.length > 0){
+        return{
+            action : 'HOLD' ,
+            decisionId : null,
+            reviewId : heldBefore.rows[0].id,
+            reviewStatus : heldBefore.rows[0].status,
+        };
+    }
     const existing = await pool.query(
         `SELECT 1 FROM transfers WHERE idempotency_key = $1`,
         [key],
@@ -39,6 +54,7 @@ export async function screenTransfer(
         RETURNING id`,
         [key , fromAccountId , toAccountId , amountMinor , result.decision , result.score , JSON.stringify(result.reasons)],
     );
+
     const decisionId = saved.rows[0].id;
 
     if(result.decision === 'BLOCK'){
@@ -48,13 +64,41 @@ export async function screenTransfer(
         };
     }
     if(result.decision === 'REVIEW'){
+        const review = await createReview(key , fromAccountId , toAccountId,amountMinor , decisionId);
         return{
             action : 'HOLD',
-            decisionId : decisionId
+            decisionId : decisionId ,
+            reviewId : review.id,
+            reviewStatus: review.status,
         };
     }
     return{
         action: 'PROCEED',
         decisionId : decisionId
     };
+}
+async function createReview(
+    Key : string, 
+    fromAccountId : number,
+    toAccountId : number,
+    amountMinor : number,
+    decisionId : number,
+){
+    const inserted = await pool.query(
+        `INSERT INTO reviews
+        (idempotency_key , from_account_id , to_account_id , amount_minor , decision_id)
+        VALUES ($1 , $2 , $3 , $4 , $5)
+        ON CONFLICT (idempotency_key) DO NOTHING
+        RETURNING id , status`,
+        [Key , fromAccountId , toAccountId , amountMinor , decisionId],
+    );
+    if(inserted.rows.length > 0){
+        return inserted.rows[0];
+    }
+    const existing = await pool.query(
+        `SELECT id , status FROM reviews WHERE idempotency_key = $1`,
+        [Key],
+    );
+    return existing.rows[0];
+
 }

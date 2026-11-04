@@ -55,10 +55,18 @@ const verdict = await screenTransfer(key , fromAccountId , toAccountId ,amount_m
 
      }
      if(verdict.action === 'HOLD'){
-        res.status(202).json({
+        if(verdict.reviewStatus === 'PENDING_REVIEW'){
+   res.status(202).json({
             status : 'PENDING_REVIEW',
-            decisionId: verdict.decisionId
+            reviewId: verdict.reviewId
         });
+        } else{
+            res.status(200).json({
+                status : verdict.reviewStatus,
+                reviewId: verdict.reviewId
+            })
+        }
+     
         return;
      }
 
