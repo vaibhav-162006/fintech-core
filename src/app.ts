@@ -177,7 +177,7 @@ app.post('/reviews/:id/approve' ,async(req,res) => {
             });
             return;
         }
-        await client.query('SAVEPOINTS attempts');
+        await client.query('SAVEPOINT attempts');
         try{
             const moved = await transferInTransiction(
                 client,

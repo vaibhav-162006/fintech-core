@@ -225,7 +225,7 @@ test('a held payment appears in review queueu with its reasons ' , async()=> {
 })
 
 async function makeHeldPayment(label : string){
-    const from = await createAccount(label + '-from-' + RUN , 1000000);
+    const from = await createAccount(label + '-from-' + RUN , 100000);
      const to = await createAccount(label + '-to-' + RUN , 0);
 
      for(let i = 1; i <=5; i++){
@@ -247,12 +247,12 @@ function approve(reviewId : number){
     });
 
 }
-test('approving a held payment moves the money once ; a second approval gets 409' , async()=>{
+test('approving a held payment moves the money once : a second approval gets 409' , async()=>{
     const held = await makeHeldPayment('t11');
 
     const first = await approve(held.reviewId);
     assert.equal(first.status, 200);
-    assert.equal(await balanceOf(held.from) , 94000);
+    assert.equal(await balanceOf(held.from) ,94000);
     assert.equal(await balanceOf(held.to) , 6000);
 
     const second = await approve(held.reviewId);
@@ -264,7 +264,8 @@ test('two reviews approving on same moment : one wins , one get : 409' , async()
     const held = await makeHeldPayment('t12');
 
     const anwsers = await Promise.all([approve(held.reviewId) , approve(held.reviewId)]);
-    const statuses = anwsers.map((a) => {
-        
-    })
-})
+    const statuses = anwsers.map((a) => a.status).sort();
+    
+    assert.deepEqual(statuses , [200,409]);
+    assert.equal(await balanceOf(held.from) , 94000);
+});
