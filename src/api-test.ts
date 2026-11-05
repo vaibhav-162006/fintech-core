@@ -212,7 +212,7 @@ test('a held payment appears in review queueu with its reasons ' , async()=> {
 
     }
     const held = await send('t10-6-' + RUN , from, to , 1000);
-    assert.equal(held.status , 200);
+    assert.equal(held.status , 202);
 
     const response = await fetch(BASE_URL + '/reviews');
     const body = await response.json();

@@ -117,4 +117,28 @@ app.get("/accounts/:id/balance" , async(req,res)=> {
     });
 
 });
+
+app.get('/reviews' , async(req, res) => {
+    const result = await pool.query(
+        `SELECT r.id, r.idempotency_key, r.from_account_id,r.to_account_id,
+        r.amount_minor , r.created_at , d.score , d.reasons
+        FROM reviews r
+        LEFT JOIN risk_decision d ON d.id = r.decision_id
+        WHERE r.status = 'PENDING_REVIEW'
+        ORDER BY r.created_at ASC , r.id ASC `
+    );
+    const reviews = result.rows.map((row) => ({
+        id: Number(row.id),
+        fromAccountId: row.from_account_id,
+        toAccountId: row.to_account_id,
+        amountMinor: Number(row.amount_minor),
+        score : row.score,
+        reasons: row.reasons,
+        waitingSince : row.created_at,
+ 
+    }));
+    res.json({
+        reviews: reviews
+    })
+})
 export default app;

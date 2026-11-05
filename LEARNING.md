@@ -123,3 +123,11 @@
 - Option 2: claim, execute, finish with a sweeper. Needed when part of the work is outside your database; relies on an idempotent execute step.
 - Idempotency key is the safety net under both: a repeated approval moves money once.
 - GET /reviews lists held payments oldest first with the guard's reasons. Known gap: no authentication, so anyone can read the reasons.
+
+## Day 16 - Reviewer queue
+- Approving a held payment is two writes (mark approved, move money). They must not drift apart if the server dies in between.
+- Option 1 (chosen): one transaction for claim + transfer + finish. A crash rolls everything back, so the review stays PENDING_REVIEW. Simple when everything is in one database.
+- Option 2: claim, execute, finish with a sweeper. Needed when part of the work is outside your database; relies on an idempotent execute step.
+- Idempotency key is the safety net under both: a repeated approval moves money once.
+- GET /reviews lists held payments oldest first with the guard's reasons. Known gap: no authentication, so anyone can read the reasons.
+- Bug: the test got an HTML 404 page where it expected JSON, because the route path did not match. Print the start of the response body in the failure message, so the cause is visible.
