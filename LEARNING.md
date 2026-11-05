@@ -116,3 +116,10 @@
 - A retry of a held payment is not judged again, which also closed the gap of duplicate risk_decision rows.
 - Bug: a space inside 'PENDING_REVIEW ' in a CHECK made the table reject its own default. Always read \d output after creating a table.
 - Concepts to come: compare-and-set (UPDATE ... WHERE status = 'PENDING_REVIEW') so only one of two reviewers wins.
+
+## Day 16 - Reviewer queue
+- Approving a held payment is two writes (mark approved, move money). They must not drift apart if the server dies in between.
+- Option 1 (chosen): one transaction for claim + transfer + finish. A crash rolls everything back, so the review stays PENDING_REVIEW. Simple when everything is in one database.
+- Option 2: claim, execute, finish with a sweeper. Needed when part of the work is outside your database; relies on an idempotent execute step.
+- Idempotency key is the safety net under both: a repeated approval moves money once.
+- GET /reviews lists held payments oldest first with the guard's reasons. Known gap: no authentication, so anyone can read the reasons.

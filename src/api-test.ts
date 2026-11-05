@@ -202,3 +202,24 @@ test('retrying a held payment returns to same review and crates no second one' ,
     assert.equal(Number(decisions.rows[0].n) , 1);
 
 });
+
+test('a held payment appears in review queueu with its reasons ' , async()=> {
+    const from = await createAccount('t10-from-' + RUN , 1000000);
+    const to = await createAccount('t10-to-' + RUN , 0);
+
+    for(let i = 1; i <= 5; i++){
+        await send ('t10-' + i + '-' + RUN , from , to , 1000);
+
+    }
+    const held = await send('t10-6-' + RUN , from, to , 1000);
+    assert.equal(held.status , 200);
+
+    const response = await fetch(BASE_URL + '/reviews');
+    const body = await response.json();
+  assert.equal(response.status, 200);
+
+  const mine = body.reviews.find((r: any) => r.id === Number(held.body.reviewId));
+  assert.ok(mine, 'the held payment should be in the queue');
+  assert.equal(mine.amountMinor, 1000);
+  assert.equal(mine.reasons[0].code, 'HIGH_VELOCITY');
+})
