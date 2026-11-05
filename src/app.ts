@@ -1,8 +1,9 @@
 import express from "express";
 import { pool } from "./db"
-import{ transfer } from "./transfer";
+import{ transfer , transferInTransiction } from "./transfer";
 import { screenTransfer } from "./screen";
 import { error } from "node:console";
+import { stat } from "node:fs";
 
 const app = express();
 app.use(express.json());
@@ -141,4 +142,89 @@ app.get('/reviews' , async(req, res) => {
         reviews: reviews
     })
 })
+
+app.post('/reviews/:id/approve' ,async(req,res) => {
+    const id = Number(req.params.id);
+    if(!Number.isInteger(id)){
+        res.status(400).json({
+            error : 'review id must be a whole number'
+        });
+        return;
+    }
+    const client = await pool.connect();
+    try{
+        await client.query('BEGIN');
+
+        const found = await client.query(
+            `SELECT id, idempotency_key , from_account_id , to_account_id, amount_minor , status 
+            FROM reviews WHERE id = $1 FOR UPDATE`,
+            [id],
+
+        );
+        if(found.rows.length === 0){
+            await client.query('ROLLBACK');
+            res.status(404).json({
+                error : 'Review not found'
+            });
+            return;
+        }
+        const review = found.rows[0];
+
+        if(review.status !== 'PENDING_REVIEW'){
+            await client.query('ROLLBACK');
+            res.status(409).json({
+                error : "REVIEW ALREADY_DECIDED" , status : review.status
+            });
+            return;
+        }
+        await client.query('SAVEPOINTS attempts');
+        try{
+            const moved = await transferInTransiction(
+                client,
+                review.idempotency_key,
+                review.from_account_id,
+                review.to_account_id,
+                Number(review.amount_minor),
+            );
+            await client.query(
+                `UPDATE reviews SET status = 'COMPLETED' , resolved_at = now() WHERE id =$1`,
+                [id],
+            );
+            await client.query('COMMIT');
+            res.status(200).json({
+                status : 'COMPLETED',
+                transferId : moved.transferId,
+            });
+            return;
+
+        } catch (error){
+            if((error as Error).message === 'INSUFFECIENT_FUNDS'){
+                await client.query('ROLLBACK to SAVEPOINT attempt');
+                await client.query(
+                    `UPDATE reviews
+                        SET status = 'FAILED' , failure_reason = 'INSUFFECIENT_FUNDS' , resolved_at = now()
+                        WHERE id = $1`,
+                    [id],
+                );
+                await client.query('COMMIT');
+                res.status(422).json({
+                    status : 'FAILED',
+                    reason : 'INSUFFECIENT_FUNDS'
+                });
+                return;
+            }
+            throw error;
+
+        }
+    } catch (error){
+        await client.query('ROLLBACK');
+        console.error(error);
+        res.status(500).json({
+            error : "INTERNAL ERROR"
+        });
+    } finally{
+        client.release();
+    }
+
+});
 export default app;
