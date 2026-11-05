@@ -223,3 +223,48 @@ test('a held payment appears in review queueu with its reasons ' , async()=> {
   assert.equal(mine.amountMinor, 1000);
   assert.equal(mine.reasons[0].code, 'HIGH_VELOCITY');
 })
+
+async function makeHeldPayment(label : string){
+    const from = await createAccount(label + '-from-' + RUN , 1000000);
+     const to = await createAccount(label + '-to-' + RUN , 0);
+
+     for(let i = 1; i <=5; i++){
+        await send(label + '-' + i + '-' + RUN,from, to , 1000)
+     }
+     const held = await send(label + '-' + '-6-' + RUN , from ,to, 1000);
+     assert.equal(held.status , 202);
+
+     return{
+        from: from,
+        to : to ,
+        reviewId : held.body.reviewId
+     };
+    
+}
+function approve(reviewId : number){
+    return fetch(BASE_URL + '/reviews/' + reviewId + '/approve' , {
+        method : "POST"
+    });
+
+}
+test('approving a held payment moves the money once ; a second approval gets 409' , async()=>{
+    const held = await makeHeldPayment('t11');
+
+    const first = await approve(held.reviewId);
+    assert.equal(first.status, 200);
+    assert.equal(await balanceOf(held.from) , 94000);
+    assert.equal(await balanceOf(held.to) , 6000);
+
+    const second = await approve(held.reviewId);
+    assert.equal(second.status , 409);
+    assert.equal(await balanceOf(held.from) , 94000);
+});
+
+test('two reviews approving on same moment : one wins , one get : 409' , async() =>{
+    const held = await makeHeldPayment('t12');
+
+    const anwsers = await Promise.all([approve(held.reviewId) , approve(held.reviewId)]);
+    const statuses = anwsers.map((a) => {
+        
+    })
+})
