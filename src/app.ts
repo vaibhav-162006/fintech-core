@@ -55,17 +55,27 @@ const verdict = await screenTransfer(key , fromAccountId , toAccountId ,amount_m
         return;
 
      }
+     console.log("SCREEN VERDICT:", verdict);
      if(verdict.action === 'HOLD'){
         if(verdict.reviewStatus === 'PENDING_REVIEW'){
    res.status(202).json({
             status : 'PENDING_REVIEW',
             reviewId: verdict.reviewId
         });
-        } else{
-            res.status(200).json({
-                status : verdict.reviewStatus,
-                reviewId: verdict.reviewId
+        } else if(verdict.reviewStatus === 'REJECTED'){
+            res.status(403).json({
+                error: "TRANSFER_DECLINED"
+            });
+        } else if (verdict.reviewStatus === 'FAILED'){
+            res.status(402).json({
+                error : "INSUFFICIENT_FUNDS"
+            });
+        } else {
+            console.error('unexpected review status' , verdict.reviewStatus);
+            res.status(500).json({
+                error : "Internal Error"
             })
+
         }
      
         return;
@@ -227,4 +237,66 @@ app.post('/reviews/:id/approve' ,async(req,res) => {
     }
 
 });
+
+app.post('/reviews/:id/reject' , async(req,res) =>{
+    const id = Number(req.params.id);
+    if(!Number.isInteger(id)){
+        res.status(409).json({
+            error : "review id must be a whole number"
+        });
+        return;
+    }
+    const body = req.body ?? {};
+    const note = typeof body.reason === 'string' ? body.reason.trim() : '';
+    if(note === ''){
+        res.status(400).json({
+            error : "a reason is required"
+        });
+        return;
+    }
+    const decidedBy = typeof body.reviewer === 'string' ? body.reviewer.trim() : null;
+    const client = await pool.connect();
+    try{
+        await client.query('BEGIN');
+
+        const found = await client.query(
+            `SELECT id , status FROM reviews WHERE id = $1 FOR UPDATE `,
+            [id],
+        );
+        if(found.rows.length === 0){
+            await client.query('ROLLBACK');
+            res.status(404).json({
+                error : "review not found"
+            });
+            return;
+        } 
+        if(found.rows[0].status !== 'PENDING_REVIEW'){
+            await client.query('ROLLBACK');
+            res.status(409).json({
+                error : 'REVIEW_ALREADY_DECIDED', status: found.rows[0].status
+            });
+            return;
+        }
+        await client.query(
+            `UPDATE reviews
+            SET status = 'REJECTED' , decision_note = $2 , decided_by = $3 , resolved_at = now()
+            WHERE id = $1`,
+            [id,note ,decidedBy],
+        );
+        await client.query('COMMIT');
+        res.status(200).json({
+            status : 'REJECTED'
+        });
+
+    } catch(error){
+        await client.query('ROLLBACK');
+        console.error(error);
+        res.status(500).json({
+            error : 'Internal Error'
+        })
+    } finally {
+        client.release();
+    }
+
+})
 export default app;

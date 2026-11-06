@@ -65,3 +65,7 @@ CREATE TABLE IF NOT EXISTS reviews (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   resolved_at TIMESTAMPTZ
 );
+
+ALTER TABLE reviews
+ADD COLUMN IF NOT EXISTS decision_note TEXT,
+ADD COLUMN IF NOT EXISTS decided_by TEXT;

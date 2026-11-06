@@ -131,3 +131,11 @@
 - Idempotency key is the safety net under both: a repeated approval moves money once.
 - GET /reviews lists held payments oldest first with the guard's reasons. Known gap: no authentication, so anyone can read the reasons.
 - Bug: the test got an HTML 404 page where it expected JSON, because the route path did not match. Print the start of the response body in the failure message, so the cause is visible.
+
+## Day 17 - Rejecting held payments
+- Review states are one-way: PENDING_REVIEW -> COMPLETED | FAILED | REJECTED, all final. A decision that can be flipped later is worth nothing as evidence.
+- Rejecting a held payment needs no ledger entry, because nothing was posted. Undoing a COMPLETED payment would need a new correcting transfer, never an edit.
+- reject locks the review (FOR UPDATE), reads the status after the lock, requires a reason, and records who and when. A late second decision gets 409.
+- The customer sees only TRANSFER_DECLINED after a rejection; the reason stays internal for analysts and auditors.
+- An unknown review status returns 500 instead of a silent success, so a new state cannot slip through unnoticed.
+- Known gaps: decided_by is an unverified claim because there is no authentication; no reconciliation check yet that review status agrees with the ledger.

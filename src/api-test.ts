@@ -231,7 +231,7 @@ async function makeHeldPayment(label : string){
      for(let i = 1; i <=5; i++){
         await send(label + '-' + i + '-' + RUN,from, to , 1000)
      }
-     const held = await send(label + '-' + '-6-' + RUN , from ,to, 1000);
+     const held = await send(label + '-6-' + RUN , from ,to, 1000);
      assert.equal(held.status , 202);
 
      return{
@@ -268,4 +268,54 @@ test('two reviews approving on same moment : one wins , one get : 409' , async()
     
     assert.deepEqual(statuses , [200,409]);
     assert.equal(await balanceOf(held.from) , 94000);
+});
+
+function reject(reviewId : number , reason: string){
+    return fetch(BASE_URL + '/reviews/' + reviewId + '/reject' , {
+        method : 'POST',
+        headers : {
+            'Content-Type' : 'application/json'
+        } , 
+        body : JSON.stringify({
+            reason : reason , reviewer : 'Vaibhav'
+        }),
+    });
+}
+test('rejecting a held payment moves no money and records who and why' , async()=>{ 
+    const held = await makeHeldPayment('t13');
+
+const res = await reject(held.reviewId, 'customer reports stolen phone');
+assert.equal(res.status, 200, await res.clone().text());
+    assert.equal(await balanceOf(held.from) , 95000);
+    assert.equal(await balanceOf(held.to) , 5000);
+
+    const row = await pool.query(
+        `SELECT status, decision_note , decided_by FROM reviews WHERE id = $1`,
+        [held.reviewId],
+    );
+    assert.equal(row.rows[0].status , 'REJECTED');
+    assert.equal(row.rows[0].decision_note , 'customer reports stolen phone');
+    assert.equal(row.rows[0].decided_by , 'Vaibhav');
+
+});
+test('a rejection needs a reason , and a decided review is final' , async()=>{
+    const held = await makeHeldPayment('t14');
+
+    const noReason = await reject(held.reviewId , '');
+    assert.equal(noReason.status , 400);
+
+    const first = await reject (held.reviewId , 'stolen phone');
+    assert.equal(first.status , 200);
+
+    const lateApprove = await approve(held.reviewId);
+    assert.equal(lateApprove.status , 409);
+    assert.equal(await balanceOf(held.from) , 95000);
+});
+test('retrying a reject payment returns 403 and does not look like review' , async()=>{
+    const held = await makeHeldPayment('t15');
+    await reject(held.reviewId , 'stolen phone');
+
+    const retry = await send('t15-6-' + RUN , held.from , held.to , 1000);
+    assert.equal(retry.status , 403);
+    assert.equal(retry.body.error, 'TRANSFER_DECLINED');
 });
