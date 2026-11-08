@@ -154,3 +154,11 @@
 - Training data needs the raw facts saved with each decision and a verdict. risk_decision keeps reasons, not the numbers; reviews keeps human verdicts only for held payments, so missed fraud is never labeled.
 - Wrote a pure measure() function with tests using the story's numbers.
 - Bug: the function was not exported, so the test saw "measure is not a function". A missing export looks like a missing function.
+
+## Day 19 - Saving the facts behind each decision
+- A training row is one payment: features (facts known at decision time) plus a label (was it fraud). Accuracy and precision grade the model; they are not what it predicts.
+- Labels: REJECTED for fraud reasons = fraud, COMPLETED = honest, FAILED = insufficient funds (not fraud). Unreviewed payments are assumed honest, which is a known source of noise.
+- risk_decision.features (JSONB) stores the exact facts the guard saw, for every decision including ALLOW.
+- Facts must be a snapshot from decision time. Recomputing later would let the payment count itself and let future payments leak in (data leakage).
+- A model trained on synthetic data only recovers the patterns we put in the generator. Honest claim: no statement about real fraud.
+- Bugs: an INSERT with two jsonb columns had its values swapped and Postgres accepted it silently (the nth column, nth placeholder and nth value must be the same thing); a test searched for a key with an extra dash and got no row. A failing lookup should assert that the row exists, so the message explains itself.

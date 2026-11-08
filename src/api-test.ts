@@ -319,3 +319,19 @@ test('retrying a reject payment returns 403 and does not look like review' , asy
     assert.equal(retry.status , 403);
     assert.equal(retry.body.error, 'TRANSFER_DECLINED');
 });
+test('a risk decision saves the fact that guard saw' , async()=> {
+    await makeHeldPayment('t16');
+
+    const row = await pool.query(
+        `SELECT features FROM risk_decision WHERE idempotency_key = $1`,
+        ['t16-6-' + RUN],
+    );
+    const f = row.rows[0].features;
+
+    assert.equal(f.transfersLastMinute , 5);
+    assert.equal(f.pastTransferCount , 5);
+    assert.equal(f.averageAmountMinor , 1000);
+    assert.equal(f.sentLast24hMinor , 5000);
+    assert.equal(f.senderBalanceMinor , 95000);
+    assert.equal(f.isNewReceiver , false);
+});

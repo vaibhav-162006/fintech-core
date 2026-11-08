@@ -49,10 +49,10 @@ export async function screenTransfer(
 
     const saved = await pool.query(
         `INSERT INTO risk_decision
-        (idempotency_key , from_account_id , to_account_id,amount_minor,decision ,score , reasons)
-        VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)
+        (idempotency_key , from_account_id , to_account_id,amount_minor,decision ,score , reasons , features)
+        VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb , $8::jsonb)
         RETURNING id`,
-        [key , fromAccountId , toAccountId , amountMinor , result.decision , result.score , JSON.stringify(features)],
+        [key , fromAccountId , toAccountId , amountMinor , result.decision , result.score ,JSON.stringify(result.reasons) ,  JSON.stringify(features)],
     );
 
     const decisionId = saved.rows[0].id;

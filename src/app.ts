@@ -55,7 +55,7 @@ const verdict = await screenTransfer(key , fromAccountId , toAccountId ,amount_m
         return;
 
      }
-     console.log("SCREEN VERDICT:", verdict);
+
      if(verdict.action === 'HOLD'){
         if(verdict.reviewStatus === 'PENDING_REVIEW'){
    res.status(202).json({
