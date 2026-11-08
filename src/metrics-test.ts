@@ -24,3 +24,14 @@ test('a guard that never holds anything is 99.8% accurate and catches mo fraud' 
     assert.equal(result.precision , 0);
     assert.equal(result.recall , 0);
 });
+test('a stricter guard' , () => {
+    const result = measure({
+        caught : 16,
+        falseAlarams : 284,
+        missed : 4,
+        passed : 9696,
+    });
+    assert.equal(Math.round(result.precision * 1000) / 1000 , 0.053);
+    assert.equal(Math.round(result.recall * 1000) / 1000 , 0.8);
+
+})

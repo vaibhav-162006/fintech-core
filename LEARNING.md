@@ -146,3 +146,11 @@
 - Accuracy is a trap when fraud is rare: a guard that holds nothing scores 99.8% and catches no fraud. Use precision (of the held, how many were fraud) and recall (of the fraud, how many were held).
 - Training data needs the raw facts saved with each decision and a verdict. risk_decision keeps reasons, not the numbers; reviews keeps human verdicts only for held payments, so missed fraud is never labeled.
 - Wrote a pure measure() function with tests using the story's numbers.
+
+## Day 18 - Measuring a risk guard
+- A rule engine judges one payment at a time. A fraud ring's pattern (12 identical payments spread over hours) exists only across payments, so no single rule sees it. Fraudsters also learn the thresholds and stay under them.
+- Every extra check catches more fraud and also holds more honest customers. The question for any rule is how many honest people it annoys per fraud it catches.
+- Accuracy is a trap when fraud is rare: a guard that holds nothing scores 99.8% and catches no fraud. Use precision (of the held, how many were fraud) and recall (of the fraud, how many were held).
+- Training data needs the raw facts saved with each decision and a verdict. risk_decision keeps reasons, not the numbers; reviews keeps human verdicts only for held payments, so missed fraud is never labeled.
+- Wrote a pure measure() function with tests using the story's numbers.
+- Bug: the function was not exported, so the test saw "measure is not a function". A missing export looks like a missing function.
