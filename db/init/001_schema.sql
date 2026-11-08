@@ -69,3 +69,7 @@ CREATE TABLE IF NOT EXISTS reviews (
 ALTER TABLE reviews
 ADD COLUMN IF NOT EXISTS decision_note TEXT,
 ADD COLUMN IF NOT EXISTS decided_by TEXT;
+
+ALTER TABLE risk_decision
+    ADD COLUMN IF NOT EXISTS features JSONB;
+    

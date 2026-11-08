@@ -52,7 +52,7 @@ export async function screenTransfer(
         (idempotency_key , from_account_id , to_account_id,amount_minor,decision ,score , reasons)
         VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb)
         RETURNING id`,
-        [key , fromAccountId , toAccountId , amountMinor , result.decision , result.score , JSON.stringify(result.reasons)],
+        [key , fromAccountId , toAccountId , amountMinor , result.decision , result.score , JSON.stringify(features)],
     );
 
     const decisionId = saved.rows[0].id;
