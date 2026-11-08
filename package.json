@@ -8,7 +8,8 @@
     "stress": "tsx --env-file=.env src/stress-test.ts",
     "reconcile": "tsx --env-file=.env src/reconcile.ts",
     "start": "tsx --env-file=.env src/server.ts",
-    "test:risk": "node --import tsx --test src/risk.test.ts"
+    "test:risk": "node --import tsx --test src/risk.test.ts",
+    "test:metrics": "node --import tsx --test src/metrics-test.ts"
   },
   "keywords": [],
   "author": "",
