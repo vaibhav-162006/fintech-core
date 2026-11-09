@@ -30,7 +30,7 @@ test('no payments is bigger than its sender balance and amounts are whole number
 test('the fraud pattern stays under the guard thresholds that look at one payment' , ()=> {
     const payments = generatePayments(20000, 0.015, 42);
     for(const p of payments.filter((x) => x.isFraud)){
-        assert.ok(p.transferLastMinute < 5);
+        assert.ok(p.transfersLastMinute < 5);
         assert.ok(p.amountMinor < 100000);
     }
 })

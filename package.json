@@ -9,7 +9,9 @@
     "reconcile": "tsx --env-file=.env src/reconcile.ts",
     "start": "tsx --env-file=.env src/server.ts",
     "test:risk": "node --import tsx --test src/risk.test.ts",
-    "test:metrics": "node --import tsx --test src/metrics-test.ts"
+    "test:metrics": "node --import tsx --test src/metrics-test.ts",
+    "test:data": "node --import tsx --test src/generate-data.test.ts",
+    "generate": "tsx src/generate-data.ts"
   },
   "keywords": [],
   "author": "",

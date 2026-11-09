@@ -10,10 +10,10 @@ export function makeRandom(seed : number){
     };
 }
 export interface Payment{
-    transferLastMinute : number;
+    transfersLastMinute : number;
     pastTransferCount : number;
     averageAmountMinor : number;
-    isNewReciever : boolean;
+    isNewReceiver : boolean;
     sentLast24hMinor : number;
     senderBalanceMinor : number;
     amountMinor : number;
@@ -28,10 +28,10 @@ const average = between(random , 20000 , 150000);
 const amount = Math.max(1000 , Math.round(average * (0.4 + random() * 1.6)));
 const balance = between(random , 5, 60) * average;
 return{
-    transferLastMinute : random() < 0.97 ? 0 : 1,
+    transfersLastMinute : random() < 0.97 ? 0 : 1,
     pastTransferCount : between(random , 3 , 60),
     averageAmountMinor : average,
-    isNewReciever: random() < 0.12,
+    isNewReceiver: random() < 0.12,
     sentLast24hMinor: between(random , 0 ,3) * average,
     senderBalanceMinor : balance,
     amountMinor : Math.min(amount ,balance),
@@ -44,10 +44,10 @@ function fraudPayment (random : ()=> number) : Payment{
     const balance = between(random , 10 , 40) * amount;
 
     return{
-        transferLastMinute : random() < 0.9 ? 0 : 1,
+        transfersLastMinute : random() < 0.9 ? 0 : 1,
         pastTransferCount : between(random , 0 , 12),
         averageAmountMinor : average , 
-        isNewReciever : random() < 0.9,
+        isNewReceiver : random() < 0.9,
         sentLast24hMinor : between(random, 2 ,10) * amount,
         senderBalanceMinor : balance ,
         amountMinor : amount,
@@ -63,8 +63,8 @@ export function generatePayments(count : number , fraudShare : number, seed : nu
     return payments;
 }
 const columns: (keyof Payment)[] = [
-    'transferLastMinute' , 'pastTransferCount' ,'averageAmountMinor',
-    'sentLast24hMinor' , 'amountMinor' , 'isFraud' , 'senderBalanceMinor' , 'isNewReciever',
+    'transfersLastMinute' , 'pastTransferCount' ,'averageAmountMinor',
+    'sentLast24hMinor' , 'amountMinor' , 'isFraud' , 'senderBalanceMinor' , 'isNewReceiver',
 ];
 
 export function toCsv(payments : Payment[]){
