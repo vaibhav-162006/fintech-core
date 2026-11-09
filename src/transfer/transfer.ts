@@ -1,5 +1,5 @@
 import { PoolClient } from "pg";
-import {pool} from "./db";
+import {pool} from "./config/db";
 import { error } from "node:console";
 import { replace } from "react-router-dom";
 
