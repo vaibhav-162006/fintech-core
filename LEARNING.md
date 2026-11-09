@@ -162,3 +162,11 @@
 - Facts must be a snapshot from decision time. Recomputing later would let the payment count itself and let future payments leak in (data leakage).
 - A model trained on synthetic data only recovers the patterns we put in the generator. Honest claim: no statement about real fraud.
 - Bugs: an INSERT with two jsonb columns had its values swapped and Postgres accepted it silently (the nth column, nth placeholder and nth value must be the same thing); a test searched for a key with an extra dash and got no row. A failing lookup should assert that the row exists, so the message explains itself.
+
+## Day 20 - Synthetic training data
+- Real fraud data does not exist in this project, so a seeded generator writes fake payments to data/payments.csv, with the same six facts the guard saves plus the amount and an isFraud label.
+- A fixed seed makes the data reproducible: same seed, same file. Without it, results change every run and bugs cannot be reproduced.
+- About 1.5% fraud, like real life. 50% would be easy and unrealistic. With rare fraud, accuracy is a trap (Day 18), so precision and recall are the real scores.
+- The fraud pattern deliberately stays under the guard's thresholds, so the model is not just rediscovering our rules.
+- Honest claim: a model trained on this data only recovers the patterns we planted. It says nothing about real fraud.
+- The CSV lives outside the database and outside git (data/ is ignored); it can be regenerated from the seed.
