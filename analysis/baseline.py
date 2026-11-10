@@ -2,8 +2,14 @@ import csv;
 import random;
 
 EXPECTED = [
-    "transfersLastMinute","sentLast24hMinor","pastTransferCount","averageAmountMinor",
-    "isNewReceiver","senderBalanceMinor","amountMinor","isFraud"
+    "transfersLastMinute",
+    "sentLast24hMinor",
+    "pastTransferCount",
+    "averageAmountMinor",
+    "isNewReceiver",
+    "senderBalanceMinor",
+    "amountMinor",
+    "isFraud"
 ]
 def measure(caught , false_alarms , missed , passed):
     total = caught + false_alarms + missed + passed
@@ -23,16 +29,31 @@ missing = [name for name in EXPECTED if name not in header]
 if missing:
     raise SystemExit("missing columns: " + str(missing))
 
-blanks = sum(1 for r in rows for v in r.values() if v == "")
+blanks = 0
+
+for r in rows:
+    for v in r.values():
+        if v is None or v.strip() == "":
+            blanks += 1
 label_values = sorted(set(r["isFraud"] for r in rows))
+if set(label_values) != {"false","true"}:
+        raise SystemExit("Invalid Fraud Labels")
 print("blank cells: " , blanks)
 print("values in isFraud" , label_values)
 
 total = len(rows)
-fraud = sum(1 for r in rows if r["isFraud"] == "true")
+fraud = sum(
+    1 for r in rows
+    if r["isFraud"] == "true"
+     )
 print(f"rows : {total}, fraud: {fraud} ({fraud/total:.1%})")
 
-never_flag = measure(caught=0, false_alarms=0, missed=fraud,passed=total-fraud)
+never_flag = measure(
+    caught=0 ,
+    false_alarms=0,
+    missed=fraud,
+    passed=total-fraud
+    )
 print(f"never-flag guard: {never_flag}")
 
 
