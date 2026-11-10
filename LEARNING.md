@@ -170,3 +170,10 @@
 - The fraud pattern deliberately stays under the guard's thresholds, so the model is not just rediscovering our rules.
 - Honest claim: a model trained on this data only recovers the patterns we planted. It says nothing about real fraud.
 - The CSV lives outside the database and outside git (data/ is ignored); it can be regenerated from the seed.
+
+## Day 21 - First Python: checking the data and the baseline
+- Check a dataset before training: column names match the guard's, no blank cells, labels only true/false, fraud share about 1.5%, no column that leaks the answer.
+- The never-flag guard scores about 98.5% accuracy and catches nothing. A model must beat it on recall, and beat the rule guard at the same number of holds.
+- Train/test split: the model learns from 80% and is graded on a sealed 20% it has never seen. A model graded on its own training rows can score near 100% by memorizing.
+- A seeded shuffle makes the split reproducible.
+- Python for a JS developer: dict is an object, list comprehension replaces map/filter, f-strings replace template literals, indentation replaces braces.
