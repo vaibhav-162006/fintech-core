@@ -53,3 +53,21 @@ def anwsers(part):
 
 x_train , y_train = inputs(train) , anwsers(train)
 x_test , y_test = inputs(test) , anwsers(test)
+
+model = RandomForestClassifier(n_estimators = 100 , random_state = 42)
+model.fix(x_train , y_train)
+
+train_scores = [p[1] for p in model.predict_proba(x_train)]
+test_scores = [p[1] for p in model.predict_proba(x_test)]
+
+print("---the trap: grading on rows the model has seen---")
+grade("model on TRAIN rows" , [s >= 0.5 for s in train_scores] , y_train)
+
+print("---the real grade : rows it has never seen ---")
+grade("never-flag guard on TEST rows" , [False] * len(y_test) , y_test)
+grade("model on TEST rows, hold score >= 0.5" , [s >= 0.5 for s in test_scores] , y_test)
+
+order = sorted(range(len(test_scores)) , key = lambda  i: test_scores[i] , reverse = True)
+top = set(order[:HOLDS])
+grade(f"model on TEST rows , hold the top  {HOLDS}" , [i in top for i in range (len(test_scores))], y_test)
+
