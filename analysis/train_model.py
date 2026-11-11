@@ -5,11 +5,11 @@ from sklearn.ensemble import RandomForestClassifier
 
 
 FEATURES = [
-    "transferLastMinute" , "sentLast2hMinor" , "averageAmountMinor" ,
-    "pastCountTransfer" , "isNewReciever" , "isFraud" , "senderBalanceMinor" , "amountMinor"
+    "transfersLastMinute" , "sentLast24hMinor" , "averageAmountMinor" ,
+    "pastTransferCount" , "isNewReceiver" , "isFraud" , "senderBalanceMinor" , "amountMinor"
 ]
 HOLDS = 80
-def to number(value):
+def to_number(value):
     if value == "true" :
         return 1
     if value == "false":
@@ -22,7 +22,7 @@ def measure(caught , false_alarms , missed , passed):
     frauds = caught + missed
     return{
         "accuracy" : (caught + passed) / total if total else 0,
-        "precision" : caught / held if had else 0,
+        "precision" : caught / held if held else 0,
         "recall" : caught / frauds if frauds else 0,
 
     }
@@ -41,7 +41,7 @@ with open("data/payments.csv") as f:
     rows = list(csv.DictReader(f))
 
 random.Random(42).shuffle(rows)
-cut = init(len(rows) * 0.8)
+cut = int(len(rows) * 0.8)
 train = rows[:cut]
 test = rows[cut:]
 
@@ -55,7 +55,7 @@ x_train , y_train = inputs(train) , anwsers(train)
 x_test , y_test = inputs(test) , anwsers(test)
 
 model = RandomForestClassifier(n_estimators = 100 , random_state = 42)
-model.fix(x_train , y_train)
+model.fit(x_train , y_train)
 
 train_scores = [p[1] for p in model.predict_proba(x_train)]
 test_scores = [p[1] for p in model.predict_proba(x_test)]

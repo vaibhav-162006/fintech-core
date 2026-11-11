@@ -177,3 +177,11 @@
 - Train/test split: the model learns from 80% and is graded on a sealed 20% it has never seen. A model graded on its own training rows can score near 100% by memorizing.
 - A seeded shuffle makes the split reproducible.
 - Python for a JS developer: dict is an object, list comprehension replaces map/filter, f-strings replace template literals, indentation replaces braces.
+
+## Day 22 - First model
+- A random forest is many decision trees, each learned from random samples, voting. The score is the share of trees voting fraud: high means risky.
+- Overfitting: the model memorizes quirks of the training rows. It scores near-perfect on rows it has seen and worse on new ones, so only the sealed test rows give the real grade.
+- Test rows must never be used to tune anything; tuning needs a validation slice carved out of the training rows.
+- Hold the top N riskiest by score (Ritu's capacity) rather than a fixed threshold, and compare models at the same N.
+- The label column must never be a feature: that is leakage, and it produces fake near-perfect scores.
+- Honest limit: the fraud is planted with clear patterns, so a good score here says nothing about real fraud.
