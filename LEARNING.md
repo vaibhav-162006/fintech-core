@@ -185,3 +185,10 @@
 - Hold the top N riskiest by score (Ritu's capacity) rather than a fixed threshold, and compare models at the same N.
 - The label column must never be a feature: that is leakage, and it produces fake near-perfect scores.
 - Honest limit: the fraud is planted with clear patterns, so a good score here says nothing about real fraud.
+
+## Day 23 - Comparing the rule guard and the model fairly
+- A fair comparison keeps the same rows, the same capacity (number of holds), the same information, and no peeking (the model never trained on the test rows).
+- Ties in scores need a seeded random tie-break, or the file order decides who gets held.
+- The Python copy of the rules is checked against the same cases as src/risk.test.ts, so the two guards cannot silently drift.
+- Our fraud is planted under the rules' thresholds, so the rules lose by construction. A model win proves it finds planted patterns, not that it beats rules on real fraud.
+- Run the experiment with several seeds. A difference smaller than the wobble between splits is not real.
