@@ -1,7 +1,7 @@
 import csv
 import random
 
-froms sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 SEED = 42
 
@@ -11,9 +11,9 @@ FEATURES = [
 ]
 
 def to_number(value):
-    if value == "true"
+    if value == "true":
         return 1
-    if value == "false"
+    if value == "false":
         return 0 
     return float(value)
 
@@ -30,8 +30,7 @@ def rule_score(f):
         points += 20
     if f["sentLast24hMinor"] + amount >= 1000000:
         points += 70
-
-        return min(points , 100)
+    return min(points , 100)
 
 def quiet(**changes):
     base = {
@@ -42,7 +41,7 @@ def quiet(**changes):
     base.update(changes)
     return base
 
-assert rule_score (quiet()) == 0
+assert rule_score(quiet()) == 0
 assert rule_score(quiet(transfersLastMinute=5)) == 40
 assert rule_score(quiet(pastTransferCount=5,averageAmountMinor=10000,amountMinor=60000)) == 30
 assert rule_score(quiet(pastTransferCount=5,averageAmountMinor=10000,amountMinor=50000)) == 0
@@ -68,7 +67,7 @@ def grade(label , flagged , real):
     m = measure(caught , false_alarms , missed ,passed)
 
     print(f"{label}: held {caught + false_alarms} , caught {caught} of {caught + missed} fraud , "
-            f"precision {m['precision']:.1%} , recall {m['recall'].:.1%}")
+            f"precision {m['precision']:.1%} , recall {m['recall']:.1%}")
 
 def top_n(scores , n):
     rng = random.Random(1)
