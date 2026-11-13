@@ -111,6 +111,7 @@ Stated plainly, because they matter:
 - Balances are computed by summing the ledger. That is correct but slow at large scale; snapshots would fix it.
 - Amounts use JavaScript numbers, which are exact at this scale but not for extremely large values.
 - Synthetic data only. This is a learning project and makes no compliance claims (no KYC, PCI or regulatory handling).
+- The model experiment uses synthetic data, so its results say nothing about real fraud. The model sees only seven facts and cannot use signals such as device, location or account age.
 
 ## Roadmap
 
