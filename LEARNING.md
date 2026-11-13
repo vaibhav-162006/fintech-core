@@ -192,3 +192,10 @@
 - The Python copy of the rules is checked against the same cases as src/risk.test.ts, so the two guards cannot silently drift.
 - Our fraud is planted under the rules' thresholds, so the rules lose by construction. A model win proves it finds planted patterns, not that it beats rules on real fraud.
 - Run the experiment with several seeds. A difference smaller than the wobble between splits is not real.
+
+## Day 24 - Shipping a model safely
+- A wrong block costs a legitimate customer a failed payment, so a model that decides money needs a fallback (rules if the model is slow or down) and a latency budget.
+- Shadow mode: the model scores every payment and the score is saved, but the rules keep deciding. After months, compare what the model would have done with reviewer outcomes at the same number of holds.
+- Only rule-held payments get a verdict, so the model's blind spot is never labeled. Sending a small random sample of its high-scoring "allowed" payments to review fixes that.
+- The model sees only the facts we give it. It cannot use device, location or account age, and real fraud systems rely on those. A stated limitation.
+- Drift: the world changes and the model decays. Labels arrive late, so watch label-free signals (input shifts, the share of high scores) and early proxies (complaints, chargebacks).
