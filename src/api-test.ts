@@ -1,7 +1,7 @@
 import test, {before , after} from "node:test";
 import assert from "node:assert/strict";
 import app from "./app"
-import { pool } from "../config/db";
+import { pool } from "./db";
 import { resolve } from "node:dns";
 
 let BASE_URL = '';

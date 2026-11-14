@@ -1,7 +1,7 @@
 import express from "express";
-import { pool } from "../config/db"
-import{ transfer , transferInTransiction } from "../transfer";
-import { screenTransfer } from "../stress/screen";
+import { pool } from "./db"
+import{ transfer , transferInTransiction } from "./transfer";
+import { screenTransfer } from "./screen";
 import { error } from "node:console";
 import { stat } from "node:fs";
 

@@ -1,4 +1,4 @@
-import  { pool }  from './config/db';
+import  { pool }  from './db';
 export async function getFeatures(fromAccountId: number , toAccountId: number){
     const LastMinute = await pool.query(
         `SELECT COUNT (DISTINCT transfer_id) AS n
