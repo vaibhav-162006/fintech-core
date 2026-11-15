@@ -13,7 +13,7 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_PASSWORD: dev
+          POSTGRES_PASSWORD: ved
           POSTGRES_DB: fintech
         ports:
           - 5432:5432
@@ -24,7 +24,7 @@ jobs:
           --health-retries 10
 
     env:
-      DATABASE_URL: postgres://postgres:dev@127.0.0.1:5432/fintech
+      DATABASE_URL: postgres://postgres:ved@127.0.0.1:5432/fintech
 
     steps:
       - name: Get the code

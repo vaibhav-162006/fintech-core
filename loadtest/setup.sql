@@ -4,7 +4,7 @@ SELECT 'load-sender-' || g FROM generate_series(1,3000) AS g;
 INSERT INTO accounts(owner_name) VALUES ('load-receiver');
 
 WITH t AS(
-    INSERT INTO transfers(idempotency_key) VALUES ('load-fund') RETURNING id;
+    INSERT INTO transfers(idempotency_key) VALUES ('load-fund') RETURNING id
 
 )
 INSERT INTO journal_entries(transfer_id,account_id,direction,amount_minor)

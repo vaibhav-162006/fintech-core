@@ -20,7 +20,7 @@ services:
     ports:
       - "4001:4000"
     environment:
-      DATABASE_URL: postgres://postgres:dev@db:5432/fintech
+      DATABASE_URL: postgres://postgres:ved@db:5432/fintech
     depends_on:
       db:
         condition: service_healthy
