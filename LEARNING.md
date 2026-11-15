@@ -199,3 +199,10 @@
 - Only rule-held payments get a verdict, so the model's blind spot is never labeled. Sending a small random sample of its high-scoring "allowed" payments to review fixes that.
 - The model sees only the facts we give it. It cannot use device, location or account age, and real fraud systems rely on those. A stated limitation.
 - Drift: the world changes and the model decays. Labels arrive late, so watch label-free signals (input shifts, the share of high scores) and early proxies (complaints, chargebacks).
+
+## Day 26 - Load testing, first measurements
+- An average hides slow requests. Use percentiles: p99 is the time 99% of requests beat, so 1 in 100 is slower. Throughput (requests per second) and latency (time per request) trade off until a bottleneck appears.
+- Payments from one sender queue on the row lock (SELECT ... FOR UPDATE), so they are slower by design; different senders run in parallel.
+- A load test must avoid the risk guard's thresholds (6th payment per minute is held, daily limit), or it measures holds and not ledger writes. Setup: 3,000 senders sending one small payment each.
+- Compare tests fairly: same machine, same data size, same traffic shape, same connections, same duration; repeat runs.
+- Load tests run against the disposable Compose stack, not the dev database.

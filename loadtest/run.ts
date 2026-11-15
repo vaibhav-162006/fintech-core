@@ -1,6 +1,6 @@
 import autocannon from "autocannon";
 import { Client } from "pg";
-import { send } from "vite";
+
 
 const API = process.env.API_URL ?? "http://127.0.0.1:4001";
 const DB = process.env.LOAD_DATABSE_URL ?? 'postgres://postgres:ved@127.0.0.1:5433/fintech';
@@ -14,7 +14,7 @@ async function main(){
     });
     await client.connect();
     const senders = await client.query(
-        `SELECT id FROM accounts WHERE owner_name LIKE "load-sender-%" ORDER by id`,
+    `SELECT id FROM accounts WHERE owner_name LIKE 'load-sender-%' ORDER BY id`,
 
     );
     const receiver = await client.query(
@@ -24,7 +24,7 @@ async function main(){
     await client.end();
 
     const senderIds = senders.rows.map((r) => r.id);
-    const receiverId = receiver.rows[0].id;
+   const receiverId = receiver.rows[0].id;
     if(senderIds.length === 0){
         throw new Error('no load-sender accounts found , run loadtest/setup.sql first');
     }
@@ -61,9 +61,11 @@ async function main(){
     console.log("requests finished:" , result.requests.total);
     console.log("seconds:" , result.duration);
     console.log("throughput (req/s): " , Math.round(result.requests.total/ result.duration));
-    console.log("latency ms p50:" ,  result.latency.p50 , "p97.5:" , result.latency.p97_5);
-    console.log("2xx:" , result['2xx'] , 'non-2xx:' ,result.non2xx , "errors:" , result.errors , "timeout:" , result.timeouts);
-    console.log("status code: ", JSON.stringify(result.statusCodeStats));
+    console.log("latency ms p50:" ,  result.latency.p50 , 'p97.5:' , result.latency.p97_5
+        , "p99:" , result.latency.p99 , "max:" , result.latency.max 
+    );
+    console.log("2xx:" , result['2xx'], ' non-2xx:' ,result.non2xx , ' errors:' , result.errors , ' timeouts:' , result.timeouts);
+    console.log("status codes: ", JSON.stringify(result.statusCodeStats));
 
 }
 main().catch((error) => {
