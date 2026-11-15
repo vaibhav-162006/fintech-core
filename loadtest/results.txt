@@ -1,0 +1,49 @@
+
+> fintech-core@1.0.0 load
+> tsx loadtest/run.ts
+
+sending 2000 payments over 20 connections from 3000 senders...
+
+requests finished: 2000
+seconds: 2.01
+throughput (req/s):  995
+latency ms p50: 18 p97.5: 26 p99: 36 max: 75
+2xx: 2000  non-2xx: 0  errors: 0  timeouts: 0
+status codes:  {"201":{"count":2000}}
+
+> fintech-core@1.0.0 load
+> tsx loadtest/run.ts
+
+sending 2000 payments over 20 connections from 3000 senders...
+
+requests finished: 2000
+seconds: 1.01
+throughput (req/s):  1980
+latency ms p50: 8 p97.5: 13 p99: 18 max: 80
+2xx: 2000  non-2xx: 0  errors: 0  timeouts: 0
+status codes:  {"201":{"count":2000}}
+--- run 1, journal rows before:
+3003
+throughput (req/s):  1980
+latency ms p50: 8 p97.5: 13 p99: 20 max: 82
+status codes:  {"201":{"count":2000}}
+--- run 2, journal rows before:
+7003
+throughput (req/s):  1000
+latency ms p50: 11 p97.5: 28 p99: 40 max: 64
+status codes:  {"201":{"count":2000}}
+--- run 3, journal rows before:
+11003
+throughput (req/s):  995
+latency ms p50: 13 p97.5: 20 p99: 23 max: 29
+status codes:  {"201":{"count":2000}}
+--- run 4, journal rows before:
+15003
+throughput (req/s):  995
+latency ms p50: 14 p97.5: 22 p99: 26 max: 34
+status codes:  {"201":{"count":2000}}
+--- run 5, journal rows before:
+19003
+throughput (req/s):  995
+latency ms p50: 17 p97.5: 25 p99: 29 max: 37
+status codes:  {"201":{"count":2000}}
