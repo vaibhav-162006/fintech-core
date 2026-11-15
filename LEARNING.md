@@ -206,3 +206,10 @@
 - A load test must avoid the risk guard's thresholds (6th payment per minute is held, daily limit), or it measures holds and not ledger writes. Setup: 3,000 senders sending one small payment each.
 - Compare tests fairly: same machine, same data size, same traffic shape, same connections, same duration; repeat runs.
 - Load tests run against the disposable Compose stack, not the dev database.
+
+## Day 27 - Indexes
+- \d showed journal_entries had only a primary-key index. Postgres indexes primary keys and UNIQUE columns automatically, but not foreign key columns, so account_id and transfer_id were unindexed.
+- Every query filtering by account_id (the risk guard's five facts, the balance check) and the balanced-transfer trigger (which sums by transfer_id on every inserted row) scanned the whole table.
+- EXPLAIN ANALYZE shows how Postgres finds rows: Seq Scan reads everything, Index Scan jumps to the matches.
+- An index costs disk space and slightly slower writes; worth it when reads are far more frequent.
+- Measure before and after on a fresh stack with the same load, and save the before first.
