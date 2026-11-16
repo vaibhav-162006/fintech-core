@@ -213,3 +213,9 @@
 - EXPLAIN ANALYZE shows how Postgres finds rows: Seq Scan reads everything, Index Scan jumps to the matches.
 - An index costs disk space and slightly slower writes; worth it when reads are far more frequent.
 - Measure before and after on a fresh stack with the same load, and save the before first.
+
+## Day 28 - Contention and the hot account
+- One account can process at most 1000 / W payments per second, where W is the time (ms) the lock is held. More servers do not help: they join the same queue for one row.
+- An idle CPU with slow responses signals contention (requests asleep waiting for the lock), not heavy computation.
+- To measure the lock alone, call transfer() directly: HTTP and the risk guard would dominate (the guard holds the 6th payment per minute, and held payments never take the lock).
+- Ways to relieve a hot account: shrink the work inside the lock (indexes, balance snapshot), batch payouts into one transaction, split the account into sub-accounts.
