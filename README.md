@@ -98,6 +98,25 @@ A held payment waits in a review queue (`GET /reviews`, oldest first, with the g
 
 Status codes: 201 created, 200 replayed retry or review decided, 202 held for review, 400 bad input, 403 declined, 404 not found, 409 review already decided, 422 insufficient funds, 500 server error.
 
+
+## Performance
+
+Measured on one laptop: Docker Compose, PostgreSQL 16, Node 22, a pool of 20
+connections. Payments call transfer() directly (no HTTP and no risk guard), all
+fired at once; the table shows the median of 3 runs.
+
+| Payments | Different senders | One sender |
+|---|---|---|
+| 2,000 | 5,444 payments/s (367 ms) | 1,769 payments/s (1,130 ms) |
+
+Payments from one account queue on its row lock, so a single account tops out
+near 2,000 payments/s here, about 0.5 ms of serialized work per payment. Adding
+servers does not raise that ceiling; shrinking the work inside the lock does.
+
+These are single-machine numbers, not production figures.
+
+
+
 ## Limitations
 
 Stated plainly, because they matter:

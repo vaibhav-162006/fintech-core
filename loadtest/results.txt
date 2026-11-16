@@ -47,3 +47,27 @@ status codes:  {"201":{"count":2000}}
 throughput (req/s):  995
 latency ms p50: 17 p97.5: 25 p99: 29 max: 37
 status codes:  {"201":{"count":2000}}
+N=200
+N=1000
+N=2000
+N=200
+many     payments 200/200 | total 48 ms | 4180 payments/s   latency p50 : 25 ms , p99 : 48 ms 
+one      payments 200/200 | total 102 ms | 1960 payments/s   latency p50 : 54 ms , p99 : 101 ms 
+many     payments 200/200 | total 43 ms | 4605 payments/s   latency p50 : 24 ms , p99 : 43 ms 
+one      payments 200/200 | total 102 ms | 1956 payments/s   latency p50 : 53 ms , p99 : 102 ms 
+many     payments 200/200 | total 39 ms | 5129 payments/s   latency p50 : 22 ms , p99 : 39 ms 
+one      payments 200/200 | total 97 ms | 2054 payments/s   latency p50 : 50 ms , p99 : 97 ms 
+N=1000
+many     payments 1000/1000 | total 186 ms | 5367 payments/s   latency p50 : 99 ms , p99 : 185 ms 
+one      payments 1000/1000 | total 509 ms | 1963 payments/s   latency p50 : 250 ms , p99 : 504 ms 
+many     payments 1000/1000 | total 182 ms | 5484 payments/s   latency p50 : 95 ms , p99 : 181 ms 
+one      payments 1000/1000 | total 510 ms | 1960 payments/s   latency p50 : 251 ms , p99 : 505 ms 
+many     payments 1000/1000 | total 192 ms | 5214 payments/s   latency p50 : 105 ms , p99 : 190 ms 
+one      payments 1000/1000 | total 506 ms | 1976 payments/s   latency p50 : 248 ms , p99 : 500 ms 
+N=2000
+many     payments 2000/2000 | total 367 ms | 5444 payments/s   latency p50 : 184 ms , p99 : 362 ms 
+one      payments 2000/2000 | total 1115 ms | 1794 payments/s   latency p50 : 502 ms , p99 : 1103 ms 
+many     payments 2000/2000 | total 370 ms | 5403 payments/s   latency p50 : 183 ms , p99 : 364 ms 
+one      payments 2000/2000 | total 1146 ms | 1745 payments/s   latency p50 : 556 ms , p99 : 1134 ms 
+many     payments 2000/2000 | total 356 ms | 5613 payments/s   latency p50 : 181 ms , p99 : 351 ms 
+one      payments 2000/2000 | total 1130 ms | 1769 payments/s   latency p50 : 538 ms , p99 : 1118 ms 
