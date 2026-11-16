@@ -24,6 +24,9 @@ async function main(){
     await client.end();
 
     const senderIds = senders.rows.map((r) => r.id);
+    if(receiver.rows.length === 0){
+        throw new Error('load-receiver account is not found');
+    }
    const receiverId = receiver.rows[0].id;
     if(senderIds.length === 0){
         throw new Error('no load-sender accounts found , run loadtest/setup.sql first');
