@@ -49,7 +49,7 @@ export async function transferInTransiction(
         [[fromAccountId , toAccountId]],
     );
     
-    if(locked.rows.length < 2){
+    if(locked.rows.length !== 2){
         throw new Error('account not found')
     }
     

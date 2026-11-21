@@ -2,9 +2,11 @@ import autocannon from "autocannon";
 import { Client } from "pg";
 
 
-const API = process.env.API_URL ?? "http://127.0.0.1:4001";
-const DB = process.env.LOAD_DATABSE_URL ?? 'postgres://postgres:ved@127.0.0.1:5433/fintech';
-const TOTAL = Number(process.env.TOTAL ?? 2000);
+const API = process.env.API_URL ?? "http://127.0.0.1:4000";
+const DB = process.env.DATABASE_URL;
+if (!DB) {
+    throw new Error('DATABASE_URL is not set');
+}const TOTAL = Number(process.env.TOTAL ?? 2000);
 const CONNECTIONS = Number(process.env.CONNECTIONS ?? 20);
 
 async function main(){

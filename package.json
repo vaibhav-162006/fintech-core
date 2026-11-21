@@ -12,7 +12,7 @@
     "test:metrics": "node --import tsx --test src/metrics-test.ts",
     "test:data": "node --import tsx --test src/generate-data.test.ts",
     "generate": "tsx src/generate-data.ts",
-    "load": "tsx loadtest/run.ts"
+    "load": "tsx --env-file=.env loadtest/run.ts"
   },
   "keywords": [],
   "author": "",

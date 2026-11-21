@@ -365,7 +365,7 @@ test('opposite transfers at the same amount do not deadlock' , async()=>{
     const jobs = [];
     for(let i = 0; i < 30; i++){
         jobs.push(transfer('t18-ab-' + i + '-' + RUN , a , b , 1000));
-        jobs.push(transfer('t18-ba-' + i + '-' + RUN , a , b , 1000));
+        jobs.push(transfer('t18-ba-' + i + '-' + RUN , b , a , 1000));
 
     }
     const results = await Promise.allSettled(jobs);
