@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import app from "./app"
 import { pool } from "./db";
 import { resolve } from "node:dns";
+import { transfer } from "./transfer";
+import { fail } from "node:assert";
 
 let BASE_URL = '';
 let server : any;
@@ -78,6 +80,7 @@ after(async() => {
     await new Promise((resolve) => server.close(() => resolve(null)));
     await pool.end();
 });
+
 
 test('a new transfer moves the money and return 202' , async () => {
     const from = await createAccount('t1-from-'  + RUN, 10000);
@@ -334,4 +337,41 @@ test('a risk decision saves the fact that guard saw' , async()=> {
     assert.equal(f.sentLast24hMinor , 5000);
     assert.equal(f.senderBalanceMinor , 95000);
     assert.equal(f.isNewReceiver , false);
+});
+test('the stored balance matches the ledger after a transfer' , async()=>{
+    const from = await createAccount('t17-from-' + RUN , 100000);
+    const to = await createAccount('t17-to-' + RUN , 0);
+
+    const res = await send('t17-1-' + RUN , from , to , 4000);
+    assert.equal(res.status , 201);
+
+    const stored = await pool.query(
+        'SELECT id , balance_minor FROM accounts WHERE id = ANY($1::int[])',
+        [[from , to]],
+    );
+    const byId: any = {};
+    for(const row of stored.rows){
+        byId[row.id] = Number(row.balance_minor);
+    }
+    assert.equal(byId[from] , 96000);
+    assert.equal(byId[to] , 4000);
+    assert.equal(byId[from] , await balanceOf(from));
+    assert.equal(byId[to] , await balanceOf(to));
+});
+test('opposite transfers at the same amount do not deadlock' , async()=>{
+    const a = await createAccount('t18-a-' + RUN , 1000000);
+    const b = await createAccount('t18-b-' + RUN , 1000000);
+
+    const jobs = [];
+    for(let i = 0; i < 30; i++){
+        jobs.push(transfer('t18-ab-' + i + '-' + RUN , a , b , 1000));
+        jobs.push(transfer('t18-ba-' + i + '-' + RUN , a , b , 1000));
+
+    }
+    const results = await Promise.allSettled(jobs);
+    const failed = results.filter((r) => r.status === 'rejected') as PromiseRejectedResult[];
+    
+    assert.equal(failed.length , 0 , failed.length ? String(failed[0].reason) : '');
+    assert.equal(await balanceOf(a) , 1000000);
+    assert.equal(await balanceOf(b) , 1000000);
 });
