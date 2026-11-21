@@ -40,9 +40,19 @@ export async function transferInTransiction(
         `SELECT id FROM accounts WHERE id = $1 FOR UPDATE`,
         [fromAccountId],
     );
+
     if(lock.rows.length === 0){
         throw new Error('sender account not found');
     }
+    const locked = await client.query(
+        'SELECT id, balance_minor FROM accounts WHERE id = ANY($1::int[]) ORDER BY id FOR UPDATE',
+        [[fromAccountId , toAccountId]],
+    );
+    
+    if(locked.rows.length < 2){
+        throw new Error('account not found')
+    }
+    
     const result = await client.query(
         `SELECT COALESCE(SUM(CASE WHEN direction ='CREDIT'
                             THEN amount_minor ELSE -amount_minor END) ,0 ) AS balance
@@ -50,8 +60,8 @@ export async function transferInTransiction(
                             WHERE account_id = $1`,
                             [fromAccountId],
     );
-    const balance = Number(result.rows[0].balance);
-
+   const sender = locked.rows.find((r) => r.id === fromAccountId);
+    const balance = Number(sender.balance_minor);
     if(balance < amountMinor){
         throw new Error('INSUFFICIENT_FUNDS');
     }
