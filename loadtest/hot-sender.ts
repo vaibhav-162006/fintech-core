@@ -57,6 +57,15 @@ async function run(label: string, senders : number[] , receiver: number){
 
     );
 }
+async function makeReceivers(prefix: string , count: number){
+    const created = await pool.query(
+        `INSERT INTO accounts (owner_name)
+        SELECT $1::text || g::text FROM generate_series(1, $2::int) AS g
+        RETURNING id`,
+        [prefix , count],
+    );
+    return created.rows.map((r) => r.id as number);
+}
 async function main(){
     const receiverRow = await pool.query(
         `INSERT INTO accounts (owner_name) VALUES ($1) RETURNING id`,
