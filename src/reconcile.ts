@@ -52,6 +52,20 @@ async function main(){
         console.table(empty.rows);
         problems++;
     }
+    const drift = await pool.query(
+        `SELECT a.id,a.owner_name, a.balance_minor AS stored,
+                COALESCE(SUM(CASE WHEN e.direction = 'CREDIT' THEN e.amount_minor ELSE -e.amount_minor END),0)AS ledger
+            FROM accounts a 
+            LEFT JOIN journal_entries e ON e.account_id = a.id
+            GROUP BY a.id , a.owner_name, a.balance_minor
+            HAVING a.balance_minor <> COALESCE(SUM(CASE WHEN e.direction = 'CREDIT' THEN e.amount_minor ELSE -e.amount_minor END),0)`,
+            
+    );
+    console.log('5.) accounts whose stored balance diagress with the ledger:' , drift.rows.length);
+    if(drift.rows.length > 0){
+        console.table(drift.rows);
+        problems++;
+    }
     console.log('');
     if(problems === 0){
     console.log('RECONCILLATION OK ');
