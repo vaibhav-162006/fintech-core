@@ -219,3 +219,10 @@
 - An idle CPU with slow responses signals contention (requests asleep waiting for the lock), not heavy computation.
 - To measure the lock alone, call transfer() directly: HTTP and the risk guard would dominate (the guard holds the 6th payment per minute, and held payments never take the lock).
 - Ways to relieve a hot account: shrink the work inside the lock (indexes, balance snapshot), batch payouts into one transaction, split the account into sub-accounts.
+
+## Day 29 - Balance snapshots
+- accounts.balance_minor is a cached value kept in step with the ledger by a trigger on journal_entries, in the same transaction. A trigger covers every path, including direct SQL, so none can forget to update it.
+- The ledger stays the source of truth; reconciliation check 5 compares each stored balance with the sum of its entries.
+- transfer() now reads one stored number from the locked row instead of summing the account's history.
+- New hazards: crediting a receiver now updates its row, so (1) opposite transfers can deadlock, fixed by always locking accounts in id order, and (2) a hot receiver becomes a queue, just like a hot sender.
+- Concepts: cache vs source of truth, deadlock, lock ordering.

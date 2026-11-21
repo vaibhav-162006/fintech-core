@@ -36,10 +36,16 @@ export async function transferInTransiction(
         [idempotencyKey]
     );
     const transferId = created.rows[0].id;
-    const lock = await client.query(
-        `SELECT id FROM accounts WHERE id = $1 FOR UPDATE`,
-        [fromAccountId],
-    );
+   const lock = await client.query(
+  'SELECT id FROM accounts WHERE id = $1 FOR UPDATE',
+  [fromAccountId]
+);
+
+await client.query(
+  'SELECT id FROM accounts WHERE id = $1 FOR UPDATE',
+  [toAccountId]
+);
+    
 
     if(lock.rows.length === 0){
         throw new Error('sender account not found');
