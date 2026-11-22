@@ -38,7 +38,7 @@ export async function transferInTransiction(
     );
     const transferId = created.rows[0].id;
    const first = Math.min(fromAccountId , toAccountId);
-   const second = Math.min(fromAccountId,toAccountId);
+   const second = Math.max(fromAccountId,toAccountId);
 
    const firstRow = await client.query(
     `SELECT id , balance_minor FROM accounts WHERE id = $1 FOR UPDATE`,

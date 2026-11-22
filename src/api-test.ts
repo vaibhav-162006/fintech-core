@@ -5,6 +5,7 @@ import { pool } from "./db";
 import { resolve } from "node:dns";
 import { transfer } from "./transfer";
 import { fail } from "node:assert";
+import { ref } from "node:process";
 
 let BASE_URL = '';
 let server : any;
@@ -374,4 +375,15 @@ test('opposite transfers at the same amount do not deadlock' , async()=>{
     assert.equal(failed.length , 0 , failed.length ? String(failed[0].reason) : '');
     assert.equal(await balanceOf(a) , 1000000);
     assert.equal(await balanceOf(b) , 1000000);
+});
+
+test('the balance check reads the sender , not the receiver' , async()=>{
+    const poor = await createAccount('t19-poor-'+RUN , 1000);
+    const rich = await createAccount('t19-rich-' + RUN , 1000000);
+
+    const refused = await send('t19-1-' + RUN, poor , rich , 5000);
+    assert.equal(refused.status , 422);
+
+    const allowed = await send('t19-2-' + RUN , poor , rich, 5000);
+    assert.equal(allowed.status , 201);
 });
