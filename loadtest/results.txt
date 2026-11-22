@@ -151,3 +151,4 @@ many     payments 0/2000 | total 644 ms | 0 payments/s | shared receiver
 one      payments 0/2000 | total 646 ms | 0 payments/s | shared receiver
 many     payments 0/2000 | total 629 ms | 0 payments/s | shared receiver
 one      payments 0/2000 | total 628 ms | 0 payments/s | shared receiver
+--- INVALID: the block above had 0/2000 payments succeed. Ignore it.
