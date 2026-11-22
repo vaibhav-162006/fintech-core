@@ -131,3 +131,9 @@ one      payments 2000/2000 | total 7196 ms | 278 payments/s   latency p50 : 358
 --- RUN 3 ---
 many     payments 2000/2000 | total 6419 ms | 312 payments/s   latency p50 : 3012 ms , p99 : 6369 ms 
 one      payments 2000/2000 | total 6946 ms | 288 payments/s   latency p50 : 3105 ms , p99 : 6819 ms 
+many     payments 2000/2000 | total 7477 ms | 267 payments/s   latency p50 : 3773 ms , p99 : 7411 ms 
+one      payments 2000/2000 | total 10834 ms | 185 payments/s   latency p50 : 5638 ms , p99 : 10743 ms 
+many     payments 2000/2000 | total 8252 ms | 242 payments/s   latency p50 : 4159 ms , p99 : 8189 ms 
+one      payments 2000/2000 | total 9365 ms | 214 payments/s   latency p50 : 4725 ms , p99 : 9299 ms 
+many     payments 2000/2000 | total 8344 ms | 240 payments/s   latency p50 : 4267 ms , p99 : 8282 ms 
+one      payments 2000/2000 | total 9003 ms | 222 payments/s   latency p50 : 4481 ms , p99 : 8935 ms 

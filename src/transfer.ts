@@ -1,7 +1,8 @@
-import { PoolClient } from "pg";
+import { PoolClient, Query } from "pg";
 import {pool} from "./db";
 import { error } from "node:console";
 import { replace } from "react-router-dom";
+import { from } from "node:stream/iter";
 
 
 export async function transferInTransiction(
@@ -36,38 +37,24 @@ export async function transferInTransiction(
         [idempotencyKey]
     );
     const transferId = created.rows[0].id;
-   const lock = await client.query(
-  'SELECT id FROM accounts WHERE id = $1 FOR UPDATE',
-  [fromAccountId]
-);
+   const first = Math.min(fromAccountId , toAccountId);
+   const second = Math.min(fromAccountId,toAccountId);
 
-await client.query(
-  'SELECT id FROM accounts WHERE id = $1 FOR UPDATE',
-  [toAccountId]
-);
-    
-
-    if(lock.rows.length === 0){
-        throw new Error('sender account not found');
-    }
-    const locked = await client.query(
-        'SELECT id, balance_minor FROM accounts WHERE id = ANY($1::int[]) ORDER BY id FOR UPDATE',
-        [[fromAccountId , toAccountId]],
-    );
-    
-    if(locked.rows.length !== 2){
-        throw new Error('account not found')
-    }
-    
-    const result = await client.query(
-        `SELECT COALESCE(SUM(CASE WHEN direction ='CREDIT'
-                            THEN amount_minor ELSE -amount_minor END) ,0 ) AS balance
-                            FROM journal_entries
-                            WHERE account_id = $1`,
-                            [fromAccountId],
-    );
-   const sender = locked.rows.find((r) => r.id === fromAccountId);
-    const balance = Number(sender.balance_minor);
+   const firstRow = await client.query(
+    `SELECT id , balance_minor FROM accounts WHERE id = $1 FOR UPDATE`,
+    [first],
+   );
+   const secondRow = await client.query(
+    `SELECT id, balance_minor FROM accounts WHERE id = $1 FOR UPDATE`,
+    [second],
+   );
+   if(firstRow.rows.length === 0 || secondRow.rows
+    .length === 0
+   ){
+    throw new Error('account not found');
+   }
+   const senderRow = fromAccountId === first ? firstRow.rows[0] : secondRow.rows[0];
+   const balance = Number(senderRow.balance_minor);
     if(balance < amountMinor){
         throw new Error('INSUFFICIENT_FUNDS');
     }
