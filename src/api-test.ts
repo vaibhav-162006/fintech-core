@@ -384,6 +384,6 @@ test('the balance check reads the sender , not the receiver' , async()=>{
     const refused = await send('t19-1-' + RUN, poor , rich , 5000);
     assert.equal(refused.status , 422);
 
-    const allowed = await send('t19-2-' + RUN , poor , rich, 5000);
+    const allowed = await send('t19-2-' + RUN , rich , poor, 5000);
     assert.equal(allowed.status , 201);
 });

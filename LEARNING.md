@@ -233,3 +233,9 @@
 - Crediting a receiver now locks its row, so opposite transfers (A pays B, B pays A) can deadlock. Postgres waits 1 second before it breaks a deadlock, so 51 failures took 37 seconds.
 - My first fix (one SELECT ... WHERE id = ANY(...) ORDER BY id FOR UPDATE) did not guarantee lock order: FOR UPDATE locks rows as the scan returns them, not in ORDER BY order. The fix is two separate statements, lower id first, so the order is fixed in code. Test time: 37 s to 71 ms.
 - Measurements taken on broken code are thrown away. Get the tests green before measuring.
+
+## Day 30 - Load test after the snapshot
+- A load test where every payment failed (0/2000) measured nothing. Print failure reasons, and only trust runs where every payment succeeds.
+- The balance check read the wrong account because second was computed wrongly; 18 tests and the stress test still passed, because no test had a sender poorer than its receiver. The load test found it. A regression test now covers both id orders.
+- One account row is a queue whether it sends or receives: with the stored balance, a shared receiver capped many senders at about 1,700 payments/s (own receivers: about 5,200).
+- The snapshot's benefit shows on accounts with long histories, which this test does not have.
