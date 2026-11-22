@@ -101,21 +101,23 @@ Status codes: 201 created, 200 replayed retry or review decided, 202 held for re
 
 ## Performance
 
-Measured on one laptop: Docker Compose, PostgreSQL 16, Node 22, a pool of 20
-connections. Payments call transfer() directly (no HTTP and no risk guard), all
-fired at once; the table shows the median of 3 runs.
+Measured on one laptop: Docker Compose, PostgreSQL 16, Node 22, a pool of
+20 connections. Payments call transfer() directly (no HTTP, no risk guard), all
+fired at once; median of 3 runs, N = 2,000 payments.
 
-| Payments | Different senders | One sender |
+| Payments go to | Different senders | One sender |
 |---|---|---|
-| 2,000 | 5,444 payments/s (367 ms) | 1,769 payments/s (1,130 ms) |
+| a different receiver each | 5,171 payments/s | 2,073 payments/s |
+| one shared receiver | 1,679 payments/s | 1,691 payments/s |
 
-Payments from one account queue on its row lock, so a single account tops out
-near 2,000 payments/s here, about 0.5 ms of serialized work per payment. Adding
-servers does not raise that ceiling; shrinking the work inside the lock does.
+Each account's row is locked while a payment touches it, so one account
+(as sender or as receiver) tops out around 1,700 to 2,100 payments/s on this
+machine. Adding servers does not raise that ceiling.
+
+The stored balance makes reading a balance cheap, but crediting an account now
+takes its row lock, so a hot receiver queues like a hot sender.
 
 These are single-machine numbers, not production figures.
-
-
 
 ## Limitations
 
@@ -141,3 +143,4 @@ Stated plainly, because they matter:
 - Outbox pattern and event stream
 - Balance snapshots
 - Load test with published latency numbers
+

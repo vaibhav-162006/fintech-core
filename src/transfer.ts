@@ -55,9 +55,7 @@ export async function transferInTransiction(
    }
    const senderRow = fromAccountId === first ? firstRow.rows[0] : secondRow.rows[0];
    const balance = Number(senderRow.balance_minor);
-   console.log('DEBUG balance check' , {
-    fromAccountId , toAccountId,first,second , balance, amountMinor
-   });
+ 
     if(balance < amountMinor){
         throw new Error('INSUFFICIENT_FUNDS');
     }

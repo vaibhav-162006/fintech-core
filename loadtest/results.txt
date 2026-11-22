@@ -152,3 +152,30 @@ one      payments 0/2000 | total 646 ms | 0 payments/s | shared receiver
 many     payments 0/2000 | total 629 ms | 0 payments/s | shared receiver
 one      payments 0/2000 | total 628 ms | 0 payments/s | shared receiver
 --- INVALID: the block above had 0/2000 payments succeed. Ignore it.
+many     payments 2000/2000 | total 388 ms | 5157 payments/s | own receiver
+one      payments 2000/2000 | total 1042 ms | 1919 payments/s | own receiver
+many     payments 2000/2000 | total 412 ms | 4849 payments/s | own receiver
+one      payments 2000/2000 | total 1008 ms | 1984 payments/s | own receiver
+many     payments 2000/2000 | total 369 ms | 5426 payments/s | own receiver
+one      payments 2000/2000 | total 994 ms | 2012 payments/s | own receiver
+--- snapshot code (fixed), SHARED receiver, N=2000
+many     payments 2000/2000 | total 1312 ms | 1525 payments/s | shared receiver
+one      payments 2000/2000 | total 1270 ms | 1574 payments/s | shared receiver
+many     payments 2000/2000 | total 1196 ms | 1672 payments/s | shared receiver
+one      payments 2000/2000 | total 1214 ms | 1648 payments/s | shared receiver
+many     payments 2000/2000 | total 1217 ms | 1643 payments/s | shared receiver
+one      payments 2000/2000 | total 1163 ms | 1719 payments/s | shared receiver
+--- snapshot code (fixed), own receivers, N=2000
+many     payments 2000/2000 | total 391 ms | 5109 payments/s | own receiver
+one      payments 2000/2000 | total 965 ms | 2073 payments/s | own receiver
+many     payments 2000/2000 | total 364 ms | 5489 payments/s | own receiver
+one      payments 2000/2000 | total 1001 ms | 1998 payments/s | own receiver
+many     payments 2000/2000 | total 387 ms | 5171 payments/s | own receiver
+one      payments 2000/2000 | total 954 ms | 2097 payments/s | own receiver
+--- snapshot code (fixed), SHARED receiver, N=2000
+many     payments 2000/2000 | total 1175 ms | 1702 payments/s | shared receiver
+one      payments 2000/2000 | total 1170 ms | 1709 payments/s | shared receiver
+many     payments 2000/2000 | total 1346 ms | 1486 payments/s | shared receiver
+one      payments 2000/2000 | total 1182 ms | 1691 payments/s | shared receiver
+many     payments 2000/2000 | total 1191 ms | 1679 payments/s | shared receiver
+one      payments 2000/2000 | total 1215 ms | 1647 payments/s | shared receiver
