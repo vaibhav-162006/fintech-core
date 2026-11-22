@@ -226,3 +226,10 @@
 - transfer() now reads one stored number from the locked row instead of summing the account's history.
 - New hazards: crediting a receiver now updates its row, so (1) opposite transfers can deadlock, fixed by always locking accounts in id order, and (2) a hot receiver becomes a queue, just like a hot sender.
 - Concepts: cache vs source of truth, deadlock, lock ordering.
+
+## Day 29-30 - Balance snapshots and a deadlock
+- accounts.balance_minor is a cached value kept in step with the ledger by a trigger on journal_entries, in the same transaction. The ledger stays the source of truth; reconciliation check 5 compares them.
+- transfer() reads one stored number from the locked row instead of summing the account's history.
+- Crediting a receiver now locks its row, so opposite transfers (A pays B, B pays A) can deadlock. Postgres waits 1 second before it breaks a deadlock, so 51 failures took 37 seconds.
+- My first fix (one SELECT ... WHERE id = ANY(...) ORDER BY id FOR UPDATE) did not guarantee lock order: FOR UPDATE locks rows as the scan returns them, not in ORDER BY order. The fix is two separate statements, lower id first, so the order is fixed in code. Test time: 37 s to 71 ms.
+- Measurements taken on broken code are thrown away. Get the tests green before measuring.
