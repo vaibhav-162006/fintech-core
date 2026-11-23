@@ -5,7 +5,7 @@ INSERT INTO accounts(owner_name , balance_minor)
 SELECT 'bench-' || g, 100000 FROM generate_series(1,1000) AS g;
 INSERT INTO accounts(owner_name , balance_minor) VALUES ('bench-hot' , 20000000);
 
-INSERT INTO jounal_entries(transfer_id, account_id , direction , amount_minor)
+INSERT INTO journal_entries(transfer_id, account_id , direction , amount_minor)
 SELECT gen_random_uuid() , a.id , 'CREDIT' , 100
 FROM accounts a , generate_series(1,1000)
 WHERE a.owner_name LIKE 'bench%' AND a.owner_name <> 'bench-hot';
