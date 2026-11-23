@@ -15,6 +15,6 @@ SELECT gen_random_uuid() , (SELECT id FROM accounts WHERE owner_name = 'bench-ho
 FROM generate_series(1,200000);
 
 SET session_replication_role = origin;
-CREATE INDEX IF NOT EXISTS idx_journal_entries_account_id ON jounal_entries(account_id);
-ANALYZE jounal_entries;
+CREATE INDEX IF NOT EXISTS idx_journal_entries_account_id ON journal_entries(account_id);
+ANALYZE journal_entries;
 

@@ -179,3 +179,78 @@ many     payments 2000/2000 | total 1346 ms | 1486 payments/s | shared receiver
 one      payments 2000/2000 | total 1182 ms | 1691 payments/s | shared receiver
 many     payments 2000/2000 | total 1191 ms | 1679 payments/s | shared receiver
 one      payments 2000/2000 | total 1215 ms | 1647 payments/s | shared receiver
+---- run 1
+---- run 2
+---- run 3
+--- run 1
+== hot account, 200000 entries: SUM with index
+== ordinary account , 1000 entries : SUM with index
+== hot account : stored balance
+== hot account , 200000 entries : SUM , no index
+== ordinary account, 1000 entries: SUM , no index
+--- run 2
+== hot account, 200000 entries: SUM with index
+== ordinary account , 1000 entries : SUM with index
+== hot account : stored balance
+== hot account , 200000 entries : SUM , no index
+== ordinary account, 1000 entries: SUM , no index
+--- run 3
+== hot account, 200000 entries: SUM with index
+== ordinary account , 1000 entries : SUM with index
+== hot account : stored balance
+== hot account , 200000 entries : SUM , no index
+== ordinary account, 1000 entries: SUM , no index
+--- run 1
+== hot account, 200000 entries: SUM with index
+== ordinary account , 1000 entries : SUM with index
+== hot account : stored balance
+== hot account , 200000 entries : SUM , no index
+== ordinary account, 1000 entries: SUM , no index
+--- run 2
+== hot account, 200000 entries: SUM with index
+== ordinary account , 1000 entries : SUM with index
+== hot account : stored balance
+== hot account , 200000 entries : SUM , no index
+== ordinary account, 1000 entries: SUM , no index
+--- run 3
+== hot account, 200000 entries: SUM with index
+== ordinary account , 1000 entries : SUM with index
+== hot account : stored balance
+== hot account , 200000 entries : SUM , no index
+== ordinary account, 1000 entries: SUM , no index
+--- run 1
+== hot account, 200000 entries: SUM with index
+== ordinary account , 1000 entries : SUM with index
+== hot account : stored balance
+== hot account , 200000 entries : SUM , no index
+== ordinary account, 1000 entries: SUM , no index
+--- run 2
+== hot account, 200000 entries: SUM with index
+== ordinary account , 1000 entries : SUM with index
+== hot account : stored balance
+== hot account , 200000 entries : SUM , no index
+== ordinary account, 1000 entries: SUM , no index
+--- run 3
+== hot account, 200000 entries: SUM with index
+== ordinary account , 1000 entries : SUM with index
+== hot account : stored balance
+== hot account , 200000 entries : SUM , no index
+== ordinary account, 1000 entries: SUM , no index
+--- run 1
+== hot account, 200000 entries: SUM with index
+== ordinary account , 1000 entries : SUM with index
+== hot account : stored balance
+== hot account , 200000 entries : SUM , no index
+== ordinary account, 1000 entries: SUM , no index
+--- run 2
+== hot account, 200000 entries: SUM with index
+== ordinary account , 1000 entries : SUM with index
+== hot account : stored balance
+== hot account , 200000 entries : SUM , no index
+== ordinary account, 1000 entries: SUM , no index
+--- run 3
+== hot account, 200000 entries: SUM with index
+== ordinary account , 1000 entries : SUM with index
+== hot account : stored balance
+== hot account , 200000 entries : SUM , no index
+== ordinary account, 1000 entries: SUM , no index
