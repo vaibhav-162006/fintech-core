@@ -239,3 +239,9 @@
 - The balance check read the wrong account because second was computed wrongly; 18 tests and the stress test still passed, because no test had a sender poorer than its receiver. The load test found it. A regression test now covers both id orders.
 - One account row is a queue whether it sends or receives: with the stored balance, a shared receiver capped many senders at about 1,700 payments/s (own receivers: about 5,200).
 - The snapshot's benefit shows on accounts with long histories, which this test does not have.
+
+## Day 31 - What the snapshot actually buys
+- Throughput of one account is limited by the time spent inside its row lock: 1000 / (ms under the lock) payments per second.
+- Without an index, reading an account's balance costs the same for every account (it scans the whole table). With an index, it costs in proportion to that account's own history. A stored balance costs the same however long the history.
+- An index also costs write time and disk space: every insert updates every index.
+- Benchmark shape: 1,000 ordinary accounts (1,000 entries each) and one hot account (200,000). Disposable stack only, because the bulk load creates unbalanced entries that reconcile would flag.
