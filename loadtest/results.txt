@@ -255,3 +255,61 @@ one      payments 2000/2000 | total 1215 ms | 1647 payments/s | shared receiver
 == hot account , 200000 entries : SUM , no index
 == ordinary account, 1000 entries: SUM , no index
 --- run 1
+--- run 1
+== hot account, 200000 entries: SUM with index
+               ->  Parallel Bitmap Heap Scan on journal_entries  (cost=2333.22..15748.76 rows=83483 width=15) (actual time=5.360..19.001 rows=66667 loops=3)
+                     ->  Bitmap Index Scan on idx_journal_entries_account_id  (cost=0.00..2283.13 rows=200360 width=0) (actual time=7.215..7.215 rows=200000 loops=1)
+ Execution Time: 29.869 ms
+== ordinary account , 1000 entries : SUM with index
+   ->  Bitmap Heap Scan on journal_entries  (cost=12.12..3045.78 rows=992 width=15) (actual time=0.409..16.772 rows=1000 loops=1)
+         ->  Bitmap Index Scan on idx_journal_entries_account_id  (cost=0.00..11.87 rows=992 width=0) (actual time=0.261..0.261 rows=1000 loops=1)
+ Execution Time: 17.154 ms
+== hot account : stored balance
+ Execution Time: 0.075 ms
+== hot account , 200000 entries : SUM , no index
+               ->  Parallel Bitmap Heap Scan on journal_entries  (cost=2333.22..15748.76 rows=83483 width=15) (actual time=3.876..11.172 rows=66667 loops=3)
+                     ->  Bitmap Index Scan on idx_journal_entries_accounts_id  (cost=0.00..2283.13 rows=200360 width=0) (actual time=5.588..5.588 rows=200000 loops=1)
+ Execution Time: 21.770 ms
+== ordinary account, 1000 entries: SUM , no index
+   ->  Bitmap Heap Scan on journal_entries  (cost=12.12..3045.78 rows=992 width=15) (actual time=0.248..3.074 rows=1000 loops=1)
+         ->  Bitmap Index Scan on idx_journal_entries_accounts_id  (cost=0.00..11.87 rows=992 width=0) (actual time=0.127..0.127 rows=1000 loops=1)
+ Execution Time: 3.346 ms
+--- run 2
+== hot account, 200000 entries: SUM with index
+               ->  Parallel Bitmap Heap Scan on journal_entries  (cost=2283.76..15706.38 rows=84050 width=15) (actual time=5.379..12.582 rows=66667 loops=3)
+                     ->  Bitmap Index Scan on idx_journal_entries_account_id  (cost=0.00..2233.33 rows=201720 width=0) (actual time=6.873..6.873 rows=200000 loops=1)
+ Execution Time: 22.191 ms
+== ordinary account , 1000 entries : SUM with index
+   ->  Bitmap Heap Scan on journal_entries  (cost=12.14..3054.09 rows=995 width=15) (actual time=0.296..2.720 rows=1000 loops=1)
+         ->  Bitmap Index Scan on idx_journal_entries_account_id  (cost=0.00..11.89 rows=995 width=0) (actual time=0.177..0.178 rows=1000 loops=1)
+ Execution Time: 2.899 ms
+== hot account : stored balance
+ Execution Time: 0.013 ms
+== hot account , 200000 entries : SUM , no index
+               ->  Parallel Bitmap Heap Scan on journal_entries  (cost=2347.76..15770.38 rows=84050 width=15) (actual time=4.086..10.250 rows=66667 loops=3)
+                     ->  Bitmap Index Scan on idx_journal_entries_accounts_id  (cost=0.00..2297.33 rows=201720 width=0) (actual time=5.329..5.329 rows=200000 loops=1)
+ Execution Time: 19.822 ms
+== ordinary account, 1000 entries: SUM , no index
+   ->  Bitmap Heap Scan on journal_entries  (cost=12.14..3054.09 rows=995 width=15) (actual time=0.236..1.408 rows=1000 loops=1)
+         ->  Bitmap Index Scan on idx_journal_entries_accounts_id  (cost=0.00..11.89 rows=995 width=0) (actual time=0.119..0.119 rows=1000 loops=1)
+ Execution Time: 1.608 ms
+--- run 3
+== hot account, 200000 entries: SUM with index
+               ->  Parallel Bitmap Heap Scan on journal_entries  (cost=2237.07..15639.07 rows=82400 width=15) (actual time=5.323..12.549 rows=66667 loops=3)
+                     ->  Bitmap Index Scan on idx_journal_entries_account_id  (cost=0.00..2187.63 rows=197760 width=0) (actual time=6.548..6.548 rows=200000 loops=1)
+ Execution Time: 22.132 ms
+== ordinary account , 1000 entries : SUM with index
+   ->  Bitmap Heap Scan on journal_entries  (cost=12.16..3062.39 rows=998 width=15) (actual time=0.310..2.980 rows=1000 loops=1)
+         ->  Bitmap Index Scan on idx_journal_entries_account_id  (cost=0.00..11.91 rows=998 width=0) (actual time=0.194..0.194 rows=1000 loops=1)
+ Execution Time: 3.165 ms
+== hot account : stored balance
+ Execution Time: 0.013 ms
+== hot account , 200000 entries : SUM , no index
+               ->  Parallel Bitmap Heap Scan on journal_entries  (cost=2301.07..15703.07 rows=82400 width=15) (actual time=3.370..10.985 rows=66667 loops=3)
+                     ->  Bitmap Index Scan on idx_journal_entries_accounts_id  (cost=0.00..2251.63 rows=197760 width=0) (actual time=4.860..4.860 rows=200000 loops=1)
+ Execution Time: 20.649 ms
+== ordinary account, 1000 entries: SUM , no index
+   ->  Bitmap Heap Scan on journal_entries  (cost=12.16..3062.39 rows=998 width=15) (actual time=0.253..1.625 rows=1000 loops=1)
+         ->  Bitmap Index Scan on idx_journal_entries_accounts_id  (cost=0.00..11.91 rows=998 width=0) (actual time=0.123..0.123 rows=1000 loops=1)
+ Execution Time: 1.846 ms
+--- INVALID: the bench ran on a database with 63M rows and 12 hot accounts. Ignore everything above this line.
