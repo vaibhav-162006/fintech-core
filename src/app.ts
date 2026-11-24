@@ -2,6 +2,7 @@ import express from "express";
 import { pool } from "./db"
 import{ transfer , transferInTransiction } from "./transfer";
 import { screenTransfer } from "./screen";
+import { verifyPassword, signToken } from "./auth";
 import { error } from "node:console";
 import { stat } from "node:fs";
 
@@ -299,4 +300,31 @@ app.post('/reviews/:id/reject' , async(req,res) =>{
     }
 
 })
+
+app.post('/auth/login' , async(req,res) => {
+    const body = req.body ?? {};
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+    const password = typeof body.password === 'string' ? body.password : '';
+    if(email === ''|| password === ''){
+        res.status(400).json({
+            error : 'email and password is required'
+        })
+        return;
+    }
+    const found = await pool.query(
+        `SELECT id , password_hash , role FROM users WHERE email = $1`,
+        [email],
+    );
+    const user = found.rows[0];
+
+    if(!user || !verifyPassword(password , user.password_hash)){
+        res.status(401).json({
+            error : "INVALID_CREDENTIAL"
+        });
+        return;
+    }
+    res.json({
+        token : signToken({id: user.id , role: user.role})
+    });
+});
 export default app;
