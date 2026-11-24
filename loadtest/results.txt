@@ -313,3 +313,55 @@ one      payments 2000/2000 | total 1215 ms | 1647 payments/s | shared receiver
          ->  Bitmap Index Scan on idx_journal_entries_accounts_id  (cost=0.00..11.91 rows=998 width=0) (actual time=0.123..0.123 rows=1000 loops=1)
  Execution Time: 1.846 ms
 --- INVALID: the bench ran on a database with 63M rows and 12 hot accounts. Ignore everything above this line.
+--- run 1 (single index)
+== hot account, 200000 entries: SUM with index
+               ->  Parallel Bitmap Heap Scan on journal_entries  (cost=2360.75..15789.41 rows=84533 width=15) (actual time=5.269..12.675 rows=66667 loops=3)
+                     ->  Bitmap Index Scan on idx_journal_entries_account_id  (cost=0.00..2310.03 rows=202880 width=0) (actual time=6.772..6.772 rows=200000 loops=1)
+ Execution Time: 20.921 ms
+== ordinary account , 1000 entries : SUM with index
+   ->  Bitmap Heap Scan on journal_entries  (cost=12.12..3045.78 rows=992 width=15) (actual time=0.310..11.415 rows=1000 loops=1)
+         ->  Bitmap Index Scan on idx_journal_entries_account_id  (cost=0.00..11.87 rows=992 width=0) (actual time=0.191..0.191 rows=1000 loops=1)
+ Execution Time: 11.721 ms
+== hot account : stored balance
+ Execution Time: 0.083 ms
+== hot account , 200000 entries : SUM , no index
+               ->  Parallel Seq Scan on journal_entries  (cost=0.00..18622.01 rows=84533 width=15) (actual time=35.416..41.692 rows=66667 loops=3)
+ Execution Time: 50.592 ms
+== ordinary account, 1000 entries: SUM , no index
+               ->  Parallel Seq Scan on journal_entries  (cost=0.00..18622.01 rows=413 width=15) (actual time=0.042..25.264 rows=333 loops=3)
+ Execution Time: 28.936 ms
+--- run 2 (single index)
+== hot account, 200000 entries: SUM with index
+               ->  Parallel Bitmap Heap Scan on journal_entries  (cost=2302.64..15735.26 rows=84850 width=15) (actual time=4.976..10.404 rows=66667 loops=3)
+                     ->  Bitmap Index Scan on idx_journal_entries_account_id  (cost=0.00..2251.73 rows=203640 width=0) (actual time=6.185..6.185 rows=200000 loops=1)
+ Execution Time: 18.611 ms
+== ordinary account , 1000 entries : SUM with index
+   ->  Bitmap Heap Scan on journal_entries  (cost=12.12..3045.78 rows=992 width=15) (actual time=0.358..2.285 rows=1000 loops=1)
+         ->  Bitmap Index Scan on idx_journal_entries_account_id  (cost=0.00..11.87 rows=992 width=0) (actual time=0.267..0.267 rows=1000 loops=1)
+ Execution Time: 2.430 ms
+== hot account : stored balance
+ Execution Time: 0.019 ms
+== hot account , 200000 entries : SUM , no index
+               ->  Parallel Seq Scan on journal_entries  (cost=0.00..18622.01 rows=84850 width=15) (actual time=20.170..24.755 rows=66667 loops=3)
+ Execution Time: 33.507 ms
+== ordinary account, 1000 entries: SUM , no index
+               ->  Parallel Seq Scan on journal_entries  (cost=0.00..18622.01 rows=413 width=15) (actual time=0.025..19.601 rows=333 loops=3)
+ Execution Time: 24.871 ms
+--- run 3 (single index)
+== hot account, 200000 entries: SUM with index
+               ->  Parallel Bitmap Heap Scan on journal_entries  (cost=2231.49..15629.74 rows=82100 width=15) (actual time=1.863..7.557 rows=66667 loops=3)
+                     ->  Bitmap Index Scan on idx_journal_entries_account_id  (cost=0.00..2182.23 rows=197040 width=0) (actual time=3.302..3.302 rows=200000 loops=1)
+ Execution Time: 15.717 ms
+== ordinary account , 1000 entries : SUM with index
+   ->  Bitmap Heap Scan on journal_entries  (cost=12.14..3054.09 rows=995 width=15) (actual time=0.236..2.056 rows=1000 loops=1)
+         ->  Bitmap Index Scan on idx_journal_entries_account_id  (cost=0.00..11.89 rows=995 width=0) (actual time=0.137..0.137 rows=1000 loops=1)
+ Execution Time: 2.190 ms
+== hot account : stored balance
+ Execution Time: 0.017 ms
+== hot account , 200000 entries : SUM , no index
+               ->  Parallel Seq Scan on journal_entries  (cost=0.00..18622.01 rows=82100 width=15) (actual time=21.161..26.667 rows=66667 loops=3)
+ Execution Time: 38.492 ms
+== ordinary account, 1000 entries: SUM , no index
+               ->  Parallel Seq Scan on journal_entries  (cost=0.00..18622.01 rows=415 width=15) (actual time=0.057..21.339 rows=333 loops=3)
+ Execution Time: 26.614 ms
+--- NOTE: the INVALID line above refers only to runs on the 63M-row database. The runs before it on a 1.2M-row database are valid, except every 'no index' row (a second index was still present).
