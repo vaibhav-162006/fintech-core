@@ -254,3 +254,4 @@ one      payments 2000/2000 | total 1215 ms | 1647 payments/s | shared receiver
 == hot account : stored balance
 == hot account , 200000 entries : SUM , no index
 == ordinary account, 1000 entries: SUM , no index
+--- run 1
