@@ -101,23 +101,33 @@ Status codes: 201 created, 200 replayed retry or review decided, 202 held for re
 
 ## Performance
 
-Measured on one laptop: Docker Compose, PostgreSQL 16, Node 22, a pool of
-20 connections. Payments call transfer() directly (no HTTP, no risk guard), all
-fired at once; median of 3 runs, N = 2,000 payments.
+Measured on one laptop: Docker Compose, PostgreSQL 16, Node 22, a pool of 20
+connections. Single-machine numbers, not production figures.
+
+**Throughput.** Payments call transfer() directly (no HTTP, no risk guard), all
+fired at once. Median of 3 runs, 2,000 payments.
 
 | Payments go to | Different senders | One sender |
 |---|---|---|
 | a different receiver each | 5,171 payments/s | 2,073 payments/s |
 | one shared receiver | 1,679 payments/s | 1,691 payments/s |
 
-Each account's row is locked while a payment touches it, so one account
-(as sender or as receiver) tops out around 1,700 to 2,100 payments/s on this
-machine. Adding servers does not raise that ceiling.
+An account's row is locked while a payment touches it, as sender or as
+receiver, so one account tops out around 1,700 to 2,100 payments/s here.
+Adding servers does not raise that ceiling.
 
-The stored balance makes reading a balance cheap, but crediting an account now
-takes its row lock, so a hot receiver queues like a hot sender.
+**Reading a balance.** One database with 1.2 million ledger entries: one account
+with 200,000 entries and 1,000 accounts with 1,000 each, with an index on
+journal_entries.account_id.
 
-These are single-machine numbers, not production figures.
+| How the balance is read | Time |
+|---|---|
+| Sum the ledger, account with 200,000 entries | about 22 ms |
+| Sum the ledger, account with 1,000 entries | about 3 ms |
+| Stored balance (kept in step by a trigger) | about 0.013 ms |
+
+The sum grows with an account's history. The stored balance does not, and the
+ledger stays the source of truth: reconciliation checks that they agree.
 
 ## Limitations
 
