@@ -2,10 +2,12 @@ import test, {before , after} from "node:test";
 import assert from "node:assert/strict";
 import app from "./app"
 import { pool } from "./db";
+import { hashPassword ,readToken } from "./auth";
 import { resolve } from "node:dns";
 import { transfer } from "./transfer";
 import { fail } from "node:assert";
-import { ref } from "node:process";
+import { mainModule, ref } from "node:process";
+import { read } from "node:fs";
 
 let BASE_URL = '';
 let server : any;
@@ -386,4 +388,53 @@ test('the balance check reads the sender , not the receiver' , async()=>{
 
     const allowed = await send('t19-2-' + RUN , rich , poor, 5000);
     assert.equal(allowed.status , 201);
+});
+
+async function makeUser(label: string, role: string, password: string){
+    const email = label + '-' + RUN + "@example.com";
+    await pool.query(
+        `INSERT INTO users (email , password_hash , role) VALUES ($1,$2,$3)`,
+        [email , hashPassword(password), role],
+    );
+    return email;
+}
+async function login(email: string, password : string){
+    const response = await fetch(BASE_URL + '/auth/login', {
+        method : 'POST',
+        headers: {'Content-Type' : 'application/json'},
+
+    });
+    return{
+        status : response.status,
+        body: await response.json()
+    };
+
+}
+test('a correct login returns a token that carries the user and the role ' ,async () => {
+    const email = await makeUser('u1','reviewer' , 'correct-horse-9');
+    const res = await login(email , 'correct-horse-9');
+
+    assert.equal(res.status , 200);
+    const who = readToken(res.body.token);
+    assert.equal(who.role , 'reviewer');
+    assert.ok(who.userId > 0);
+});
+test('a wrong password and a unknow email get the same 401' , async() => {
+    const email = await makeUser('u2' , 'customer' , 'right-password-1');
+
+    const wrongPassword = await login(email , 'wrong-password-1');
+    const unknownEmail = await login('nobody-' + RUN + '@example.com' , 'whatever-1');
+
+    assert.equal(wrongPassword.status , 401);
+    assert.equal(unknownEmail.status , 401);
+    assert.deepEqual(wrongPassword.body , unknownEmail.body);
+
+});
+test('the password is stored as a stored as a selected hash, never as plain text', async() => {
+    const email = await makeUser('u3' , 'customer' , 'plain-secret-3');
+    const row = await pool.query('SELECT password_hash FROM useres WHERE email = $1' , [email]);
+    
+    assert.ok(!row.rows[0].password_hash.includes('plain-secret-3'));
+    assert.ok(row.rows[0].password_hash.includes(':'));
+    
 });
