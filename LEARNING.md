@@ -245,3 +245,11 @@
 - Without an index, reading an account's balance costs the same for every account (it scans the whole table). With an index, it costs in proportion to that account's own history. A stored balance costs the same however long the history.
 - An index also costs write time and disk space: every insert updates every index.
 - Benchmark shape: 1,000 ordinary accounts (1,000 entries each) and one hot account (200,000). Disposable stack only, because the bulk load creates unbalanced entries that reconcile would flag.
+
+## Day 33 - Login
+- Authentication proves who you are; authorization checks what you may do. Piece 1 is authentication; roles and ownership checks come next.
+- Passwords are stored as a salted scrypt hash, never plain text; the random salt makes identical passwords look different.
+- A JWT is signed, not secret: anyone can read the user id and role inside, but nobody can change them without breaking the signature. It expires after an hour.
+- Login returns the same 401 for an unknown email and a wrong password, so the endpoint does not reveal which emails exist. (A known leak remains: an unknown email skips the slow hash, so timing could still reveal it.)
+- KYC checks who a customer is once, at sign-up; authentication proves it on every later request. The server must look up a customer's accounts from the token, never trust fromAccountId in the request.
+- JWT_SECRET lives in .env (never committed); the committed compose and CI files use a dev-only value.

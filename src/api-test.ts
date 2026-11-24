@@ -402,6 +402,7 @@ async function login(email: string, password : string){
     const response = await fetch(BASE_URL + '/auth/login', {
         method : 'POST',
         headers: {'Content-Type' : 'application/json'},
+        body: JSON.stringify({email : email , password : password}),
 
     });
     return{
@@ -432,7 +433,7 @@ test('a wrong password and a unknow email get the same 401' , async() => {
 });
 test('the password is stored as a stored as a selected hash, never as plain text', async() => {
     const email = await makeUser('u3' , 'customer' , 'plain-secret-3');
-    const row = await pool.query('SELECT password_hash FROM useres WHERE email = $1' , [email]);
+    const row = await pool.query('SELECT password_hash FROM users WHERE email = $1' , [email]);
     
     assert.ok(!row.rows[0].password_hash.includes('plain-secret-3'));
     assert.ok(row.rows[0].password_hash.includes(':'));
