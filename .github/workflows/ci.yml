@@ -25,6 +25,7 @@ jobs:
 
     env:
       DATABASE_URL: postgres://postgres:ved@127.0.0.1:5432/fintech
+      JWT_SECRET: test-only-ci-secret-change-this-to-a-long-random-value
 
     steps:
       - name: Get the code
