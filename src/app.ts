@@ -3,13 +3,14 @@ import { pool } from "./db"
 import{ transfer , transferInTransiction } from "./transfer";
 import { screenTransfer } from "./screen";
 import { verifyPassword, signToken } from "./auth";
+import { requireAuth , requireRole } from "./guard";
 import { error } from "node:console";
 import { stat } from "node:fs";
 
 const app = express();
 app.use(express.json());
 
-app.post('/transfers' , async(req,res) => {
+app.post('/transfers' ,requireAuth , requireRole,  async(req,res) => {
     const key = req.header('Idempotency-Key');
     const body = req.body ?? {};
     const fromAccountId = body.fromAccountId;
@@ -130,7 +131,7 @@ app.get("/accounts/:id/balance" , async(req,res)=> {
 
 });
 
-app.get('/reviews' , async(req, res) => {
+app.get('/reviews' , requireAuth , requireRole,async(req, res) => {
     const result = await pool.query(
         `SELECT r.id, r.idempotency_key, r.from_account_id,r.to_account_id,
         r.amount_minor , r.created_at , d.score , d.reasons
@@ -154,7 +155,7 @@ app.get('/reviews' , async(req, res) => {
     })
 })
 
-app.post('/reviews/:id/approve' ,async(req,res) => {
+app.post('/reviews/:id/approve' ,requireAuth , requireRole,async(req,res) => {
     const id = Number(req.params.id);
     if(!Number.isInteger(id)){
         res.status(400).json({
@@ -239,7 +240,7 @@ app.post('/reviews/:id/approve' ,async(req,res) => {
 
 });
 
-app.post('/reviews/:id/reject' , async(req,res) =>{
+app.post('/reviews/:id/reject' , requireAuth , requireRole ,async(req,res) =>{
     const id = Number(req.params.id);
     if(!Number.isInteger(id)){
         res.status(409).json({
