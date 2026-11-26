@@ -197,6 +197,13 @@ app.post('/reviews/:id/approve' ,requireAuth , requireRole,async(req,res) => {
             });
             return;
         }
+        const sender = await client.query('SELECT user_id FROM accounts WHERE id = $1' , [review.from_account_id]);
+        const caller = (req as any).caller as {userId : number};
+        if(sender.rows[0] && sender.rows[0].user_Id === caller.userId){
+            await client.query('ROLLBACK');
+            res.status(403).json({error : 'CANNOT_APPROVE_OWN_PAYMENT'});
+            return;
+        }
         await client.query('SAVEPOINT attempts');
         try{
             const moved = await transferInTransiction(
