@@ -253,3 +253,10 @@
 - Login returns the same 401 for an unknown email and a wrong password, so the endpoint does not reveal which emails exist. (A known leak remains: an unknown email skips the slow hash, so timing could still reveal it.)
 - KYC checks who a customer is once, at sign-up; authentication proves it on every later request. The server must look up a customer's accounts from the token, never trust fromAccountId in the request.
 - JWT_SECRET lives in .env (never committed); the committed compose and CI files use a dev-only value.
+
+## Day 34 - Protecting the routes
+- 401 means "I do not know who you are" (no, forged or expired token); 403 means "I know who you are and you may not do this" (wrong role, or someone else's account).
+- A token only says who you are. The server must still compare the caller with the resource on every request, or Neha can name Sam's account with her own valid token (broken object-level authorization).
+- decided_by comes from the verified token, never from the request body.
+- Separation of duties: a reviewer cannot approve a payment sent from their own account. It cannot stop collusion with a different reviewer.
+- Accounts with no owner match nobody, so Treasury and seed accounts cannot be used through the API.

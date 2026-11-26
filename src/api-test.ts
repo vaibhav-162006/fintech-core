@@ -511,7 +511,7 @@ test('a reviewer cannot approve a payment from their own account , and decided_b
         {
             method : 'POST',
             headers: {
-                Authorization : 'Bearer ' + reviewer.body.token;
+                Authorization : 'Bearer ' + reviewer.body.token,
             }
         }
     );
