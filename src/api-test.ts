@@ -58,10 +58,13 @@ return id;
 
 }
 
-async function send(key : string | null , from : number , to : number , amount : any){
+async function send(key : string | null , from : number , to : number , amount : any , token? : string){
     const headers : any = {'Content-Type' : 'application/json'};
     if(key){
         headers['Idempotency-Key'] = key;
+    }
+    if(token){
+        headers['Authorization'] = 'Bearer ' + token;
     }
     const response = await fetch(BASE_URL + '/transfers' , {
         method : 'POST',
@@ -439,3 +442,38 @@ test('the password is stored as a stored as a selected hash, never as plain text
     assert.ok(row.rows[0].password_hash.includes(':'));
     
 });
+
+async function userWithToken(label : string , role : string){
+    const email = label + '-' + RUN + '@example.com';
+    const password = 'test-password-1';
+    const made = await pool.query(
+        'INSERT INTO users(email , password_hash , role) VALUES ($1, $2, $3) RETURNING id',
+        [email , hashPassword(password) , role],
+    );
+    const res = await login(email , password);
+    return{userId: made.rows[0].id as number, token: res.body.token as string
+    };
+}
+async function ownAccount(userId: number , name: string , fundingPaise : number){
+    const id = await createAccount(name , fundingPaise);
+    await pool.query('UPDATE accounts SET user_id = $1 WHERE id = $2' , [userId ,id]);
+    return id;
+}
+
+test('no token gets 401 , and a forged one get 401' , async ()=> {
+    const none = await fetch(BASE_URL + '/reviews');
+    assert.equal(none.status , 401);
+
+    const forged = await fetch(BASE_URL + '/reviews' , { headers: {Authorization: 'Bearer abc.def.ghi'}});
+    assert.equal(forged.status , 401);
+});
+test('a customer cannot send from an account they do not own and gets 403' , async() => {
+    const rajat = await userWithToken('rajat' , 'customer');
+    const Vaibhav = await userWithToken('Vaibhav' , 'customer');
+    const VaibhavAccount = await ownAccount(Vaibhav.userId , 'Vaibhav-acct-' + RUN , 100000);
+    const target = await createAccount('target-' + RUN , 0);
+
+    const res = await send('own-1-' + RUN , VaibhavAccount , target , 1000 , rajat.token);
+
+
+})
