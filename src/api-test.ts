@@ -8,6 +8,7 @@ import { transfer } from "./transfer";
 import { fail } from "node:assert";
 import { mainModule, ref } from "node:process";
 import { read } from "node:fs";
+import { log } from "node:console";
 
 let BASE_URL = '';
 let server : any;
@@ -474,6 +475,80 @@ test('a customer cannot send from an account they do not own and gets 403' , asy
     const target = await createAccount('target-' + RUN , 0);
 
     const res = await send('own-1-' + RUN , VaibhavAccount , target , 1000 , rajat.token);
+    assert.equal(res.status , 403);
+    assert.equal(await balanceOf(VaibhavAccount) , 100000);
 
+});
+test('a customer cannot read the review queue' , async () => {
+    const rajat = await userWithToken('rajat2-', 'customer');
+    const res = await fetch(BASE_URL + '/reviews' , {headers : { Authorization : 'Bearer' + rajat.token}});
+    assert.equal(res.status,403);
+});
+test('a reviewer cannot approve a payment from their own account , and decided_by is the token user' , async() => {
+    const password = 'reviewer-password-1';
 
-})
+    const reviewerEmail = await makeUser('t20-reviews1' , 'reviewer' , password);
+
+    const reviewer = await login(reviewerEmail , password);
+    const reviewId = readToken(reviewer.body.token).userId;
+
+    const from = await createAccount('t20-from-' + RUN , 100000);
+    
+    await pool.query(
+        `UPDATE accounts SET user_id = $1 WHERE id = $2`,
+        [reviewId , from]
+    );
+    const to = await createAccount('t20-to-' + RUN , 0);
+
+    for(let i = 1; i <= 5; i++){
+        await send('t20' + i + '-' + RUN , from ,to , 1000);
+    }
+    const held = await send('t20-6-' + RUN , from ,to , 1000);
+    assert.equal(held.status, 202);
+
+    const ownApproval = await fetch(
+        BASE_URL + '/reviews/' + held.body.reviewId + '/approve',
+        {
+            method : 'POST',
+            headers: {
+                Authorization : 'Bearer ' + reviewer.body.token;
+            }
+        }
+    );
+    assert.equal(ownApproval.status,403);
+
+    const ownReview = await pool.query(
+        `SELECT status FROM reviews WHERE id = $1`,
+        [held.body.reviewId],
+    );
+    assert.equal(ownReview.rows[0].status, 'PENDING_REVIEW');
+
+    const password2 = 'reviewer-password-2';
+    const review2Email = await makeUser('t20-reviewer2' , 'reviewer' , password);
+
+    const review2 = await login(review2Email , password2);
+    const review2Id = readToken(review2.body.token).userId;
+
+    const held2 = await makeHeldPayment('t20-second');
+    
+    const rejection = await fetch(BASE_URL + '/reviews/' + held2.reviewId + '/reject/',
+        {
+            method : 'POST',
+            headers: {
+                'Content-Type' : 'application/json',
+                Authorization : 'Bearer ' + review2.body.token
+            },
+            body : JSON.stringify({
+                reason : 'Stolen-phone'
+            })
+        }
+    );
+    assert.equal(rejection.status , 200);
+    const row = await pool.query(
+        `SELECT status , decided_by FROM reviews WHERE id = $1`,
+        [held2.reviewId]
+    );
+    assert.equal(row.rows[0].status , 'REJECTED');
+    assert.equal(Number(row.rows[0].decided_by) , review2Id);
+
+});
