@@ -264,7 +264,7 @@ app.post('/reviews/:id/reject' , requireAuth , requireRole ,async(req,res) =>{
         });
         return;
     }
-    const decidedBy = typeof body.reviewer === 'string' ? body.reviewer.trim() : null;
+    const decidedBy = String(((req as any).caller as {userId : number}).userId);
     const client = await pool.connect();
     try{
         await client.query('BEGIN');
