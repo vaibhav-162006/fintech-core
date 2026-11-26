@@ -49,6 +49,14 @@ if (found.rows.length !== 2) {
   res.status(404).json({ error: 'account not found' });
   return;
 }
+const caller = (req as any).caller as {userId : number; role : string};
+const ownerRow = await pool.query('SELECT user_Id FROM accounts WHERE id = $1' , [fromAccountId]);
+if(ownerRow.rows.length === 0 || ownerRow.rows[0].user_Id !== caller.userId){
+    res.status(403).json({
+        error: "NOT_YOUR_ACCOUNT"
+    });
+    return;
+}
 const verdict = await screenTransfer(key , fromAccountId , toAccountId ,amount_minor);
      if(verdict.action === 'DECLINE'){
         res.status(403).json({
