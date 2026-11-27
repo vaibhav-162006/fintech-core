@@ -491,7 +491,6 @@ test('a reviewer cannot approve a payment from their own account , and decided_b
 
     const reviewer = await login(reviewerEmail , password);
     const reviewId = readToken(reviewer.body.token).userId;
-
     const from = await createAccount('t20-from-' + RUN , 100000);
     
     await pool.query(
@@ -501,9 +500,9 @@ test('a reviewer cannot approve a payment from their own account , and decided_b
     const to = await createAccount('t20-to-' + RUN , 0);
 
     for(let i = 1; i <= 5; i++){
-        await send('t20' + i + '-' + RUN , from ,to , 1000);
+        await send('t20' + i + '-' + RUN , from ,to , 1000, reviewer.body.token);
     }
-    const held = await send('t20-6-' + RUN , from ,to , 1000);
+    const held = await send('t20-6-' + RUN , from ,to , 1000, reviewer.body.token);
     assert.equal(held.status, 202);
 
     const ownApproval = await fetch(
@@ -524,14 +523,31 @@ test('a reviewer cannot approve a payment from their own account , and decided_b
     assert.equal(ownReview.rows[0].status, 'PENDING_REVIEW');
 
     const password2 = 'reviewer-password-2';
-    const review2Email = await makeUser('t20-reviewer2' , 'reviewer' , password);
+    const review2Email = await makeUser('t20-reviewer2' , 'reviewer' , password2);
 
     const review2 = await login(review2Email , password2);
     const review2Id = readToken(review2.body.token).userId;
 
-    const held2 = await makeHeldPayment('t20-second');
+    const customer = await userWithToken('t20-customer-', 'customer');
+    const customerId = readToken(customer.token).userId;
+
+    const from2 = await createAccount('t20-from2-' + RUN , 100000);
+    const to2 = await createAccount('t20-to-' + RUN , 0);
+
+    await pool.query(
+        `UPDATE accounts SET user_id = $1 WHERE id = $2`,
+        [customerId , from2]
+    );
+
+    for(let i = 1; i <= 5; i++){
+        await send('t20-second-' + i + '-' + RUN , from2 ,to2,1000 ,customer.token);
+    }
+
+
+    const held2 = await send('t20-second-6-' + RUN , from2, to2, 1000, customer.token);
+    assert.equal(held2.status , 202);
     
-    const rejection = await fetch(BASE_URL + '/reviews/' + held2.reviewId + '/reject/',
+    const rejection = await fetch(BASE_URL + '/reviews/' + held2.body.reviewId + '/reject/',
         {
             method : 'POST',
             headers: {
@@ -546,7 +562,7 @@ test('a reviewer cannot approve a payment from their own account , and decided_b
     assert.equal(rejection.status , 200);
     const row = await pool.query(
         `SELECT status , decided_by FROM reviews WHERE id = $1`,
-        [held2.reviewId]
+        [held2.body.reviewId]
     );
     assert.equal(row.rows[0].status , 'REJECTED');
     assert.equal(Number(row.rows[0].decided_by) , review2Id);
